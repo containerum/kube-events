@@ -73,7 +73,7 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	watcher, err := client.CoreV1().Events("").Watch(meta_v1.ListOptions{
+	watcher, err := client.CoreV1().Events(ctx.String(namespaceFlag.Name)).Watch(meta_v1.ListOptions{
 		Watch: true,
 	})
 	if err != nil {
