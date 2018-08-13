@@ -19,26 +19,33 @@ var (
 	namespaceFlag = cli.StringFlag{
 		Name:    "namespace",
 		Aliases: []string{"n"},
+		EnvVars: []string{"NAMESPACE"},
 		Usage:   "Get events from namespace. If not specified get all events.",
 	}
 
 	configFlag = cli.StringFlag{
 		Name:    "config",
 		Aliases: []string{"c"},
+		EnvVars: []string{"CONFIG"},
 		Usage:   "Specify kubernetes config for connect. If not specified, use InClusterConfig for configuration",
+	}
+
+	labelSelectorFlag = cli.StringFlag{
+		Name:    "label-selector",
+		EnvVars: []string{"LABEL_SELECTOR"},
+		Usage:   "Specify labelSelector parameter. See format specification in kubernetes api docs.",
+	}
+
+	fieldSelectorFlag = cli.StringFlag{
+		Name:    "field-selector",
+		EnvVars: []string{"FIELD_SELECTOR"},
+		Usage:   "Specify fieldSelector parameter. See format specification in kubernetes api docs.",
 	}
 )
 
 type Kube struct {
 	*kubernetes.Clientset
 	config *rest.Config
-}
-
-func exitOnErr(err error) {
-	if err != nil {
-		fmt.Println("ERROR:", err)
-		os.Exit(1)
-	}
 }
 
 func setupKubeClient(ctx *cli.Context) (*Kube, error) {
@@ -74,7 +81,9 @@ func action(ctx *cli.Context) error {
 	}
 
 	watcher, err := client.CoreV1().Events(ctx.String(namespaceFlag.Name)).Watch(meta_v1.ListOptions{
-		Watch: true,
+		Watch:         true,
+		FieldSelector: ctx.String(fieldSelectorFlag.Name),
+		LabelSelector: ctx.String(labelSelectorFlag.Name),
 	})
 	if err != nil {
 		return err
@@ -108,7 +117,7 @@ func main() {
 	app := cli.App{
 		Name:        "kube-events",
 		Description: "Simple application to watch kubernetes events",
-		Flags:       []cli.Flag{&namespaceFlag, &configFlag},
+		Flags:       []cli.Flag{&namespaceFlag, &configFlag, &labelSelectorFlag, &fieldSelectorFlag},
 		Action:      action,
 	}
 
