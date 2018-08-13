@@ -1,0 +1,20 @@
+[prune]
+  non-go = true
+  unused-packages = true
+  go-tests = true
+
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.9.3"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.9.3"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "6.0.0"
+
+[[constraint]]
+  branch = "v2"
+  name = "gopkg.in/urfave/cli.v2"
