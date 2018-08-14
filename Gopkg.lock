@@ -14,6 +14,27 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
+  name = "github.com/containerum/kube-client"
+  packages = ["pkg/model"]
+  revision = "75fe3ace05f46e266810a284a81b78a323da6bff"
+  version = "v0.26.4"
+
+[[projects]]
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference"
+  ]
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
+
+[[projects]]
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
@@ -379,6 +400,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "34e9e100ff2a604fb10e74a5336936ca65f5b1429750b597a98abd45181f5954"
+  inputs-digest = "1dbbdb136bc3e9c9ab1958c6513a286b0e6ef62e0e376e3eef5d1606809d38fc"
   solver-name = "gps-cdcl"
   solver-version = 1
