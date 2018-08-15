@@ -10,8 +10,7 @@ type MergedWatch struct {
 	watchers   []watch.Interface
 	resultChan chan watch.Event
 
-	closedMutex sync.Mutex
-	closed      bool
+	onceStop sync.Once
 }
 
 func NewMergedWatch(watchers ...watch.Interface) *MergedWatch {
@@ -26,15 +25,12 @@ func NewMergedWatch(watchers ...watch.Interface) *MergedWatch {
 }
 
 func (mw *MergedWatch) Stop() {
-	mw.closedMutex.Lock()
-	defer mw.closedMutex.Unlock()
-	if !mw.closed {
+	mw.onceStop.Do(func() {
 		for _, w := range mw.watchers {
 			w.Stop()
 		}
 		close(mw.resultChan)
-		mw.closed = true
-	}
+	})
 }
 
 func (mw *MergedWatch) retranslator(w watch.Interface) {
