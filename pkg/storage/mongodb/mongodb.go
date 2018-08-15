@@ -53,3 +53,8 @@ func (s *Storage) Cleanup(deleteBefore time.Time) error {
 	_, err := bulk.Run()
 	return err
 }
+
+func (s *Storage) Close() error {
+	s.db.Session.Close()
+	return nil
+}
