@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -23,11 +24,11 @@ const (
 
 // Metadata represents common data for MongoDB record.
 type Metadata struct {
-	ID           string `bson:"_id"`
+	ID           bson.ObjectId `bson:"_id"`
 	EventType    watch.EventType
 	ResourceType ObservableResource
 	Timestamp    time.Time
-	Namespace    *string
+	Namespace    string
 	Name         string
 }
 
