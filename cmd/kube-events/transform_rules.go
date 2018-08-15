@@ -56,11 +56,16 @@ func ExtractMetadata(event watch.Event) model.Metadata {
 	if err != nil {
 		panic(err)
 	}
+	uid, err := mdAccessor.UID(event.Object)
+	if err != nil {
+		panic(err)
+	}
 	return model.Metadata{
 		ID:           bson.NewObjectId(),
 		EventType:    event.Type,
 		ResourceType: ObservableTypeFromObject(event.Object),
 		Timestamp:    time.Now().UTC(),
+		UID:          string(uid),
 		Namespace:    namespace,
 		Name:         name,
 	}
@@ -120,6 +125,11 @@ func MakeDeployRecord(event watch.Event) model.Record {
 		deploy = model.Deployment{
 			Event: extractEvent(kubeEvent),
 		}
+
+		// fix object reference
+		ret.UID = string(kubeEvent.InvolvedObject.UID)
+		ret.Name = kubeEvent.InvolvedObject.Name
+		ret.Namespace = kubeEvent.InvolvedObject.Namespace
 	default:
 		panic(fmt.Sprintf("Invalid event type %T for deploy", event.Object))
 	}
@@ -135,6 +145,11 @@ func MakePodRecord(event watch.Event) model.Record {
 	ret.Object = &model.Pod{
 		Event: extractEvent(kubeEvent),
 	}
+
+	// fix object reference
+	ret.UID = string(kubeEvent.InvolvedObject.UID)
+	ret.Name = kubeEvent.InvolvedObject.Name
+	ret.Namespace = kubeEvent.InvolvedObject.Namespace
 	return ret
 }
 

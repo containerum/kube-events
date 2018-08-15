@@ -28,6 +28,7 @@ type Metadata struct {
 	EventType    watch.EventType
 	ResourceType ObservableResource
 	Timestamp    time.Time
+	UID          string
 	Namespace    string
 	Name         string
 }
