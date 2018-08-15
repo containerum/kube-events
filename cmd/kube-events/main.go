@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/containerum/kube-events/pkg/model"
+	"github.com/containerum/kube-events/pkg/transform"
 	"gopkg.in/urfave/cli.v2"
 	core_v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,38 +17,33 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	namespaceFlag = cli.StringFlag{
-		Name:    "namespace",
-		Aliases: []string{"n"},
-		EnvVars: []string{"NAMESPACE"},
-		Usage:   "Get events from namespace. If not specified get all events.",
-	}
+var defaultListOptions = meta_v1.ListOptions{
+	Watch: true,
+}
 
+var eventTransformer = transform.EventTransformer{
+	RuleSelector: func(event watch.Event) string {
+		return string(ObservableTypeFromObject(event.Object))
+	},
+	Rules: map[string]transform.Func{
+		string(model.ObservableNamespace):        MakeNamespaceRecord,
+		string(model.ObservableDeployment):       MakeDeployRecord,
+		string(model.ObservablePod):              MakePodRecord,
+		string(model.ObservableService):          MakeServiceRecord,
+		string(model.ObservableIngress):          MakeIngressRecord,
+		string(model.ObservablePersistentVolume): MakePVRecord,
+		string(model.ObservableNode):             MakeNodeRecord,
+	},
+}
+
+var (
 	configFlag = cli.StringFlag{
 		Name:    "config",
 		Aliases: []string{"c"},
 		EnvVars: []string{"CONFIG"},
 		Usage:   "Specify kubernetes config for connect. If not specified, use InClusterConfig for configuration",
 	}
-
-	labelSelectorFlag = cli.StringFlag{
-		Name:    "label-selector",
-		EnvVars: []string{"LABEL_SELECTOR"},
-		Usage:   "Specify labelSelector parameter. See format specification in kubernetes api docs.",
-	}
-
-	fieldSelectorFlag = cli.StringFlag{
-		Name:    "field-selector",
-		EnvVars: []string{"FIELD_SELECTOR"},
-		Usage:   "Specify fieldSelector parameter. See format specification in kubernetes api docs.",
-	}
 )
-
-type Kube struct {
-	*kubernetes.Clientset
-	config *rest.Config
-}
 
 func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 	var config *rest.Config
@@ -80,11 +77,7 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	watcher, err := client.CoreV1().Events(ctx.String(namespaceFlag.Name)).Watch(meta_v1.ListOptions{
-		Watch:         true,
-		FieldSelector: ctx.String(fieldSelectorFlag.Name),
-		LabelSelector: ctx.String(labelSelectorFlag.Name),
-	})
+	watcher, err := client.CoreV1().Events("").Watch(defaultListOptions)
 	if err != nil {
 		return err
 	}
@@ -117,7 +110,7 @@ func main() {
 	app := cli.App{
 		Name:        "kube-events",
 		Description: "Simple application to watch kubernetes events",
-		Flags:       []cli.Flag{&namespaceFlag, &configFlag, &labelSelectorFlag, &fieldSelectorFlag},
+		Flags:       []cli.Flag{&configFlag},
 		Action:      action,
 	}
 
