@@ -12,7 +12,7 @@ type Namespace struct {
 
 // Deployment represents observable deployment data.
 type Deployment struct {
-	Generation int
+	Generation int64
 	Phase      string
 
 	model.Deployment
@@ -37,9 +37,9 @@ type Ingress struct {
 
 // PersistentVolume represents observable pv data.
 type PersistentVolume struct {
-	Phase string
-
-	model.Volume
+	Phase       string
+	Capacity    int // GB
+	AccessModes []v1.PersistentVolumeAccessMode
 }
 
 // Node represents observable kubernetes node data.
