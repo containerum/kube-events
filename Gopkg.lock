@@ -2,6 +2,15 @@
 
 
 [[projects]]
+  branch = "develop"
+  name = "git.containerum.net/ch/kube-api"
+  packages = [
+    "pkg/kubeerrors",
+    "pkg/model"
+  ]
+  revision = "4b490c800f1b0b4a221cc762d73a73c8fd142752"
+
+[[projects]]
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
   revision = "0bcb03f4b4d0a9428594752bd2a3b9aa0a9d4bd4"
@@ -20,10 +29,16 @@
   version = "v3.5.1"
 
 [[projects]]
+  name = "github.com/containerum/cherry"
+  packages = ["."]
+  revision = "f4fe137f837222131dcefcfa49845d189b5fc6f2"
+  version = "v1.0.2"
+
+[[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "75fe3ace05f46e266810a284a81b78a323da6bff"
-  version = "v0.26.4"
+  revision = "972c4f252587d8d783aba690c36237d94f4e7715"
+  version = "v0.23.23"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -125,6 +140,12 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+
+[[projects]]
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
@@ -190,6 +211,12 @@
   version = "1.0.1"
 
 [[projects]]
+  name = "github.com/ninedraft/boxofstuff"
+  packages = ["strset"]
+  revision = "2b74bc874f1a8ee6911d655378be9025aeaf6021"
+  version = "v0.3.7"
+
+[[projects]]
   branch = "master"
   name = "github.com/petar/GoLLRB"
   packages = ["llrb"]
@@ -200,6 +227,12 @@
   packages = ["."]
   revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
   version = "v2.0.1"
+
+[[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -260,6 +293,15 @@
   packages = ["."]
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    "bson",
+    "internal/json"
+  ]
+  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
 
 [[projects]]
   branch = "v2"
@@ -412,6 +454,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bd05b2aec1ae32687c5d995b7970bed018f2b294dcdf083ad5e4869f2e20ac49"
+  inputs-digest = "289feabe336102752f137f6c638cd5b9c76fc23d0c3f69bc643390bac776917f"
   solver-name = "gps-cdcl"
   solver-version = 1
