@@ -1,15 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
+	"text/tabwriter"
 
 	"github.com/containerum/kube-events/pkg/model"
 	"github.com/containerum/kube-events/pkg/transform"
 	"gopkg.in/urfave/cli.v2"
-	core_v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -33,37 +32,48 @@ var eventTransformer = transform.EventTransformer{
 	},
 }
 
+func printFlags(ctx *cli.Context) error {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.TabIndent|tabwriter.Debug)
+	for _, f := range ctx.FlagNames() {
+		fmt.Fprintf(w, "Flag: %s\t Value: %s\n", f, ctx.String(f))
+	}
+	return w.Flush()
+}
+
 func action(ctx *cli.Context) error {
-	client, err := setupKubeClient(ctx)
+	kubeClient, err := setupKubeClient(ctx)
 	if err != nil {
 		return err
 	}
-
-	watcher, err := client.CoreV1().Events("").Watch(defaultListOptions)
+	watcher, err := kubeClient.WatchSupportedResources(defaultListOptions)
 	if err != nil {
 		return err
 	}
-
-	go func() {
-		sigch := make(chan os.Signal)
-		signal.Notify(sigch, os.Interrupt, os.Kill)
-		<-sigch
-		watcher.Stop()
-	}()
 	defer watcher.Stop()
 
-	for event := range watcher.ResultChan() {
-		switch event.Type {
-		case watch.Added, watch.Deleted, watch.Modified:
-			str, err := json.Marshal(event.Object.(*core_v1.Event))
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s: %s\n", event.Type, str)
-		default:
-			fmt.Printf("%#v\n", event)
-		}
+	mongoStorage, err := setupMongo(ctx)
+	if err != nil {
+		return err
 	}
+	defer mongoStorage.Close()
+
+	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watcher.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer eventBuffer.Stop()
+	go eventBuffer.RunCollection()
+
+	cleaner, err := setupCleaner(ctx, mongoStorage)
+	if err != nil {
+		return err
+	}
+	defer cleaner.Stop()
+	go cleaner.RunPeriodicCleanup()
+
+	sigch := make(chan os.Signal)
+	signal.Notify(sigch, os.Kill, os.Interrupt)
+	<-sigch
 
 	return nil
 }
@@ -86,6 +96,7 @@ func main() {
 			&bufferFlushPeriodFlag,
 			&bufferMinInsertEventsFlag,
 		},
+		Before: printFlags,
 		Action: action,
 	}
 
