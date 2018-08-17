@@ -12,8 +12,6 @@ const EventsCollection = "events"
 
 type Config struct {
 	mgo.DialInfo
-
-	Database string
 }
 
 type Storage struct {
@@ -25,7 +23,7 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-	db := session.DB(cfg.Database)
+	db := session.DB(cfg.DialInfo.Database)
 
 	return &Storage{
 		db: db,
@@ -42,6 +40,7 @@ func (s *Storage) BulkInsert(r []model.Record) error {
 		docs[i] = record
 	}
 	bulk := s.db.C(EventsCollection).Bulk()
+	bulk.Unordered()
 	bulk.Insert(docs...)
 	_, err := bulk.Run()
 	return err
@@ -49,6 +48,7 @@ func (s *Storage) BulkInsert(r []model.Record) error {
 
 func (s *Storage) Cleanup(deleteBefore time.Time) error {
 	bulk := s.db.C(EventsCollection).Bulk()
+	bulk.Unordered()
 	bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
 	_, err := bulk.Run()
 	return err

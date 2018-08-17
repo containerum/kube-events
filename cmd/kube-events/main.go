@@ -12,9 +12,6 @@ import (
 	core_v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var defaultListOptions = meta_v1.ListOptions{
@@ -34,41 +31,6 @@ var eventTransformer = transform.EventTransformer{
 		string(model.ObservablePersistentVolume): MakePVRecord,
 		string(model.ObservableNode):             MakeNodeRecord,
 	},
-}
-
-var (
-	configFlag = cli.StringFlag{
-		Name:    "config",
-		Aliases: []string{"c"},
-		EnvVars: []string{"CONFIG"},
-		Usage:   "Specify kubernetes config for connect. If not specified, use InClusterConfig for configuration",
-	}
-)
-
-func setupKubeClient(ctx *cli.Context) (*Kube, error) {
-	var config *rest.Config
-	var err error
-
-	if cfg := ctx.String(configFlag.Name); cfg == "" {
-		fmt.Println("Using InClusterConfig")
-		config, err = rest.InClusterConfig()
-	} else {
-		fmt.Println("Using config from", cfg)
-		config, err = clientcmd.BuildConfigFromFlags("", cfg)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	kubecli, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Kube{
-		Clientset: kubecli,
-		config:    config,
-	}, nil
 }
 
 func action(ctx *cli.Context) error {
@@ -109,9 +71,22 @@ func action(ctx *cli.Context) error {
 func main() {
 	app := cli.App{
 		Name:        "kube-events",
-		Description: "Simple application to watch kubernetes events",
-		Flags:       []cli.Flag{&configFlag},
-		Action:      action,
+		Description: "Subscribes for kubernetes watches, filters it and records to storage.",
+		Flags: []cli.Flag{
+			&configFlag,
+			&debugFlag,
+			&textlogFlag,
+			&retentionPeriodFlag,
+			&cleanupIntervalFlag,
+			&mongoAddressFlag,
+			&mongoUserFlag,
+			&mongoPasswordFlag,
+			&mongoDatabaseFlag,
+			&bufferCapacityFlag,
+			&bufferFlushPeriodFlag,
+			&bufferMinInsertEventsFlag,
+		},
+		Action: action,
 	}
 
 	if err := app.Run(os.Args); err != nil {
