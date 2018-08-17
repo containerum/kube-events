@@ -5,8 +5,8 @@ import (
 
 	"github.com/containerum/kube-events/pkg/model"
 	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const EventsCollection = "events"

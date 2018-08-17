@@ -296,15 +296,6 @@
 
 [[projects]]
   branch = "v2"
-  name = "gopkg.in/mgo.v2"
-  packages = [
-    "bson",
-    "internal/json"
-  ]
-  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
-
-[[projects]]
-  branch = "v2"
   name = "gopkg.in/urfave/cli.v2"
   packages = ["."]
   revision = "d3ae77c26ac8db90639677e4831a728d33c36111"
@@ -454,6 +445,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9b45f1f124be625f0dfa494ccac931ac973610be13215495fcc4ed858a450a4b"
+  inputs-digest = "ed197923faac42ddfb6c8eaf4299b82ab704bf8935d9735f2bea5e4e85048ead"
   solver-name = "gps-cdcl"
   solver-version = 1
