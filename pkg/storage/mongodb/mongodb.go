@@ -33,10 +33,17 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 	db := session.DB(cfg.DialInfo.Database)
 
-	return &Storage{
+	storage := &Storage{
 		db:  db,
 		log: log,
-	}, nil
+	}
+
+	err = storage.ensureIndexes()
+	if err != nil {
+		return nil, err
+	}
+
+	return storage, nil
 }
 
 func (s *Storage) Insert(r *model.Record) error {

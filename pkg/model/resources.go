@@ -17,12 +17,12 @@ type Deployment struct {
 
 	model.Deployment
 
-	*Event
+	*Event `bson:",omitempty"`
 }
 
 // Pod represents observable deployment data.
 type Pod struct {
-	*Event
+	*Event `bson:",omitempty"`
 }
 
 // Service represents observable service data.
