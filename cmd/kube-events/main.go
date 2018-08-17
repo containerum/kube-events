@@ -66,13 +66,6 @@ func action(ctx *cli.Context) error {
 	defer eventBuffer.Stop()
 	go eventBuffer.RunCollection()
 
-	cleaner, err := setupCleaner(ctx, mongoStorage)
-	if err != nil {
-		return err
-	}
-	defer cleaner.Stop()
-	go cleaner.RunPeriodicCleanup()
-
 	sigch := make(chan os.Signal)
 	signal.Notify(sigch, os.Kill, os.Interrupt)
 	<-sigch
@@ -94,6 +87,8 @@ func main() {
 			&mongoUserFlag,
 			&mongoPasswordFlag,
 			&mongoDatabaseFlag,
+			&mongoCollectionSizeFlag,
+			&mongoCollectionMaxDocsFlag,
 			&bufferCapacityFlag,
 			&bufferFlushPeriodFlag,
 			&bufferMinInsertEventsFlag,
