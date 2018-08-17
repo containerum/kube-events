@@ -135,8 +135,18 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 	}, nil
 }
 
+type MongoLogrusAdapter struct {
+	Log *logrus.Entry
+}
+
+func (ml *MongoLogrusAdapter) Output(callDepth int, s string) error {
+	ml.Log.Debug(s)
+	return nil
+}
+
 func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
 	mgo.SetDebug(ctx.Bool(debugFlag.Name))
+	mgo.SetLogger(&MongoLogrusAdapter{Log: logrus.WithField("component", "mgo")})
 	return mongodb.OpenConnection(&mongodb.Config{
 		DialInfo: mgo.DialInfo{
 			Addrs:     ctx.StringSlice(mongoAddressFlag.Name),
