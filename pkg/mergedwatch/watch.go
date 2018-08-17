@@ -10,7 +10,8 @@ type MergedWatch struct {
 	watchers   []watch.Interface
 	resultChan chan watch.Event
 
-	onceStop sync.Once
+	onceStop  sync.Once
+	onceClose sync.Once
 }
 
 func NewMergedWatch(watchers ...watch.Interface) *MergedWatch {
@@ -18,8 +19,11 @@ func NewMergedWatch(watchers ...watch.Interface) *MergedWatch {
 		watchers:   watchers,
 		resultChan: make(chan watch.Event),
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(watchers))
 	for _, w := range mw.watchers {
-		go mw.retranslator(w)
+		go mw.retranslator(w, &wg)
+		go mw.waitClose(&wg)
 	}
 	return &mw
 }
@@ -29,14 +33,21 @@ func (mw *MergedWatch) Stop() {
 		for _, w := range mw.watchers {
 			w.Stop()
 		}
-		close(mw.resultChan)
 	})
 }
 
-func (mw *MergedWatch) retranslator(w watch.Interface) {
+func (mw *MergedWatch) retranslator(w watch.Interface, wg *sync.WaitGroup) {
 	for event := range w.ResultChan() {
 		mw.resultChan <- event
 	}
+	wg.Done()
+}
+
+func (mw *MergedWatch) waitClose(wg *sync.WaitGroup) {
+	wg.Wait()
+	mw.onceClose.Do(func() {
+		close(mw.resultChan)
+	})
 }
 
 func (mw *MergedWatch) ResultChan() <-chan watch.Event {

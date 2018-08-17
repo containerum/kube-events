@@ -37,6 +37,7 @@ readLoop:
 		}
 		fw.resultChan <- event
 	}
+	close(fw.resultChan)
 }
 
 func (fw *FilteredWatch) ResultChan() <-chan watch.Event {
@@ -46,6 +47,5 @@ func (fw *FilteredWatch) ResultChan() <-chan watch.Event {
 func (fw *FilteredWatch) Stop() {
 	fw.onceStop.Do(func() {
 		fw.inputWatch.Stop()
-		close(fw.resultChan)
 	})
 }

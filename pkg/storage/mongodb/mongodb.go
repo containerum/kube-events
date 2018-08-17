@@ -44,7 +44,7 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 
 	if cfg.CollectionSize > 0 {
-		if err := storage.createCappedCollection(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCappedCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}
@@ -54,26 +54,6 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 
 	return storage, nil
-}
-
-func (s *Storage) createCappedCollection(name string, size uint64, maxDocs uint) error {
-	s.log.WithFields(logrus.Fields{
-		"name":     name,
-		"size":     size,
-		"max_docs": maxDocs,
-	}).Debugf("Create capped collection")
-	// bson.D not working here (gives "command not found: '0'"), why?
-	return s.db.Run(struct {
-		Create string `bson:"create"`
-		Capped bool   `bson:"capped"`
-		Size   uint64 `bson:"size"`
-		Max    uint   `bson:"max,omitempty"`
-	}{
-		Create: name,
-		Capped: true,
-		Size:   size,
-		Max:    maxDocs,
-	}, nil)
 }
 
 func (s *Storage) Insert(r *model.Record) error {
