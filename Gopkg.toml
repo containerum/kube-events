@@ -30,3 +30,7 @@
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/kube-api"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.6"
