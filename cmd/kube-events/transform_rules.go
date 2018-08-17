@@ -185,10 +185,11 @@ func MakePVRecord(event watch.Event) model.Record {
 	var ret model.Record
 	ret.Metadata = ExtractMetadata(event)
 	pv := event.Object.(*core_v1.PersistentVolume)
+	storage := pv.Spec.Capacity["storage"]
 
 	ret.Object = &model.PersistentVolume{
 		Phase:       string(pv.Status.Phase),
-		Capacity:    int(pv.Spec.Capacity["storage"].ScaledValue(resource.Giga)),
+		Capacity:    int(storage.ScaledValue(resource.Giga)),
 		AccessModes: pv.Spec.AccessModes,
 	}
 	return ret
