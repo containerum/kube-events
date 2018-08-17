@@ -47,7 +47,7 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 		return nil, err
 	}
 
-	logrus.Info("Watching for: %s", strings.Join([]string{
+	logrus.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
 		"Deployment",
 		"Event",
