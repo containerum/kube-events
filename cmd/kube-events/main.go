@@ -41,6 +41,8 @@ func printFlags(ctx *cli.Context) error {
 }
 
 func action(ctx *cli.Context) error {
+	setupLogs(ctx)
+
 	kubeClient, err := setupKubeClient(ctx)
 	if err != nil {
 		return err

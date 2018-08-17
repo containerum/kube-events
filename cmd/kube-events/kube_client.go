@@ -1,8 +1,11 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/containerum/kube-events/pkg/mergedwatch"
 	"github.com/containerum/kube-events/pkg/transform"
+	"github.com/sirupsen/logrus"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
@@ -43,6 +46,16 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 	if err != nil {
 		return nil, err
 	}
+
+	logrus.Info("Watching for: %s", strings.Join([]string{
+		"ResourceQuota",
+		"Deployment",
+		"Event",
+		"Service",
+		"Ingress",
+		"PersistentVolume",
+		"Node",
+	}, ","))
 
 	mw := mergedwatch.NewMergedWatch(
 		transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter),

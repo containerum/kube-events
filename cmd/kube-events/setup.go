@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/containerum/kube-events/pkg/model"
@@ -115,10 +114,10 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 	var err error
 
 	if cfg := ctx.String(configFlag.Name); cfg == "" {
-		fmt.Println("Using InClusterConfig")
+		logrus.Info("Kube: Using InClusterConfig")
 		config, err = rest.InClusterConfig()
 	} else {
-		fmt.Println("Using config from", cfg)
+		logrus.Info("Kube: Using config from", cfg)
 		config, err = clientcmd.BuildConfigFromFlags("", cfg)
 	}
 	if err != nil {

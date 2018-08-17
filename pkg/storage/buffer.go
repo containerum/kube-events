@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/containerum/kube-events/pkg/model"
+	"github.com/sirupsen/logrus"
 )
 
 type EventInserter interface {
@@ -32,15 +33,25 @@ type RecordBuffer struct {
 	readStop    chan struct{}
 	insertStop  chan struct{}
 	insertTimer *time.Ticker
+
+	log *logrus.Entry
 }
 
 func NewRecordBuffer(cfg RecordBufferConfig) *RecordBuffer {
+	log := logrus.WithField("component", "record_buffer")
+	log.WithFields(logrus.Fields{
+		"capacity":          cfg.BufferCap,
+		"insert_period":     cfg.InsertPeriod,
+		"min_insert_events": cfg.MinInsertEvents,
+	}).Info("Initialized record buffer")
+
 	return &RecordBuffer{
 		cfg:         cfg,
 		buffer:      make([]model.Record, 0, cfg.BufferCap),
 		readStop:    make(chan struct{}),
 		insertStop:  make(chan struct{}),
 		insertTimer: time.NewTicker(cfg.InsertPeriod),
+		log:         log,
 	}
 }
 
@@ -70,6 +81,8 @@ func (rb *RecordBuffer) insertRecords() {
 			rb.bufferMu.Unlock()
 
 			if bufLen < rb.cfg.MinInsertEvents {
+				rb.log.Infof("Wanted minimum %d records to be inserted, collected %d",
+					rb.cfg.MinInsertEvents, bufLen)
 				continue
 			}
 
@@ -80,18 +93,24 @@ func (rb *RecordBuffer) insertRecords() {
 
 			// perform bulk insert
 			go func() {
-				rb.cfg.Storage.BulkInsert(oldBuf)
+				rb.log.Infof("Inserting %d events", bufLen)
+				err := rb.cfg.Storage.BulkInsert(oldBuf)
+				if err != nil {
+					rb.log.WithError(err).Error("BulkInsert failed")
+				}
 			}()
 		}
 	}
 }
 
 func (rb *RecordBuffer) RunCollection() {
+	rb.log.Debug("Starting reading/inserting records")
 	go rb.readRecords()
 	go rb.insertRecords()
 }
 
 func (rb *RecordBuffer) Stop() {
+	rb.log.Debug("Stopping reading/inserting records")
 	rb.readStop <- struct{}{}
 	rb.insertStop <- struct{}{}
 	rb.insertTimer.Stop()
