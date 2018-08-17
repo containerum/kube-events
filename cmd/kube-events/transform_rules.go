@@ -91,6 +91,7 @@ func MakeNamespaceRecord(event watch.Event) model.Record {
 	var ret model.Record
 	ret.Metadata = ExtractMetadata(event)
 	rq := event.Object.(*core_v1.ResourceQuota)
+	ret.Metadata.Name = ret.Namespace
 	ret.Object = &model.Namespace{
 		Quota: kubeClientModel.Resources{
 			Hard: extractResourceList(rq.Spec.Hard),
