@@ -13,6 +13,12 @@ type DeployFilter struct {
 	generationMap map[types.UID]int64
 }
 
+func NewDeployFilter() *DeployFilter {
+	return &DeployFilter{
+		generationMap: make(map[types.UID]int64),
+	}
+}
+
 func (df *DeployFilter) compareAndSwapGeneration(uid types.UID, newGeneration int64) bool {
 	df.generationMu.Lock()
 	defer df.generationMu.Unlock()

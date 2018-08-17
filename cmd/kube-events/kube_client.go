@@ -59,7 +59,7 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 
 	mw := mergedwatch.NewMergedWatch(
 		transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter),
-		transform.NewFilteredWatch(deplWatch, (&DeployFilter{}).Filter),
+		transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter),
 		transform.NewFilteredWatch(eventWatch, EventFilter),
 		serviceWatch,
 		ingressWatch,
