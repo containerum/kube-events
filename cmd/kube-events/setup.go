@@ -136,6 +136,7 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 }
 
 func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
+	mgo.SetDebug(ctx.Bool(debugFlag.Name))
 	return mongodb.OpenConnection(&mongodb.Config{
 		DialInfo: mgo.DialInfo{
 			Addrs:     ctx.StringSlice(mongoAddressFlag.Name),
