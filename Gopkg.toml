@@ -18,3 +18,19 @@
 [[constraint]]
   branch = "v2"
   name = "gopkg.in/urfave/cli.v2"
+
+[[constraint]]
+  name = "github.com/containerum/kube-client"
+  version = "0.23.23"
+
+[[constraint]]
+  name = "github.com/globalsign/mgo"
+  version = "r2018.06.15"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/kube-api"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.6"
