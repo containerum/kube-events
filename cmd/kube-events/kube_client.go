@@ -42,10 +42,10 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 	if err != nil {
 		return nil, err
 	}
-	nodeWatch, err := k.CoreV1().Nodes().Watch(listOptions)
+	/*nodeWatch, err := k.CoreV1().Nodes().Watch(listOptions)
 	if err != nil {
 		return nil, err
-	}
+	}*/
 
 	logrus.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
@@ -54,7 +54,7 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 		"Service",
 		"Ingress",
 		"PersistentVolume",
-		"Node",
+		//"Node",
 	}, ","))
 
 	mw := mergedwatch.NewMergedWatch(
@@ -64,7 +64,7 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 		serviceWatch,
 		ingressWatch,
 		transform.NewFilteredWatch(pvWatch, PVFilter),
-		nodeWatch,
+		//nodeWatch,
 	)
 	return mw, nil
 }
