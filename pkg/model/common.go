@@ -38,8 +38,8 @@ type Object interface{}
 
 // Record represents MongoDB record (document).
 type Record struct {
-	Metadata
-	Object Object `json:"object"`
+	Metadata `bson:",inline"`
+	Object   Object `json:"object"`
 }
 
 // UnmarshalJSON implements Unmarshaller.

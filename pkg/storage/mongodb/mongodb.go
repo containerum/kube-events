@@ -61,11 +61,14 @@ func (s *Storage) BulkInsert(r []model.Record) error {
 	bulk.Unordered()
 	bulk.Insert(docs...)
 	result, err := bulk.Run()
+	if err != nil {
+		return err
+	}
 	s.log.WithFields(logrus.Fields{
 		"matched":  result.Matched,
 		"modified": result.Modified,
 	}).Debug("Bulk insert run")
-	return err
+	return nil
 }
 
 func (s *Storage) Cleanup(deleteBefore time.Time) error {
@@ -74,11 +77,14 @@ func (s *Storage) Cleanup(deleteBefore time.Time) error {
 	bulk.Unordered()
 	bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
 	result, err := bulk.Run()
+	if err != nil {
+		return err
+	}
 	s.log.WithFields(logrus.Fields{
 		"matched":  result.Matched,
 		"modified": result.Modified,
 	}).Debug("Cleanup run")
-	return err
+	return nil
 }
 
 func (s *Storage) Close() error {

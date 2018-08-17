@@ -15,24 +15,24 @@ type Deployment struct {
 	Generation int64
 	Phase      string
 
-	model.Deployment
+	model.Deployment `bson:",inline"`
 
 	*Event `bson:",omitempty"`
 }
 
 // Pod represents observable deployment data.
 type Pod struct {
-	*Event `bson:",omitempty"`
+	*Event `bson:",inline,omitempty"`
 }
 
 // Service represents observable service data.
 type Service struct {
-	model.Service
+	model.Service `bson:",inline"`
 }
 
 // Ingress represents observable ingress data.
 type Ingress struct {
-	model.Ingress
+	model.Ingress `bson:",inline"`
 }
 
 // PersistentVolume represents observable pv data.
