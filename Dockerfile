@@ -6,7 +6,15 @@ RUN go build -v -o /bin/kube-events ./cmd/kube-events
 FROM alpine:3.7
 COPY --from=builder /bin/kube-events /
 ENV CONFIG="" \
-  NAMESPACE="" \
-  LABEL_SELECTOR="" \
-  FIELD_SELECTOR=""
+  DEBUG="" \
+  TEXT_LOG="" \
+  RETENTION_PERIOD="24h" \
+  CLEANUP_PERIOD="12h" \
+  MONGO_ADDRS="mongodb:27017" \
+  MONGO_USER="user" \
+  MONGO_PASSWORD="pass" \
+  MONGO_DATABASE="kube-events" \
+  BUFFER_CAPACITY="500" \
+  BUFFER_MIN_INSERT_EVENTS="10" \
+  BUFFER_FLUSH_PERIOD="30s"
 CMD ["/kube-events"]
