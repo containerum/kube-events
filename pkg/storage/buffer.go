@@ -59,6 +59,7 @@ func (rb *RecordBuffer) readRecords() {
 	for {
 		select {
 		case record := <-rb.cfg.Collector:
+			rb.log.Debugf("Collected record %+v", record)
 			rb.bufferMu.Lock()
 			rb.buffer = append(rb.buffer, record)
 			rb.bufferMu.Unlock()

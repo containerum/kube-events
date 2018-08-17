@@ -35,6 +35,7 @@ func NewRecordCleaner(cfg RecordCleanerConfig) *RecordCleaner {
 		cfg:          cfg,
 		cleanupTimer: time.NewTicker(cfg.CleanupRunPeriod),
 		stop:         make(chan struct{}),
+		log:          log,
 	}
 }
 

@@ -19,7 +19,7 @@ import (
 
 func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	switch object.(type) {
-	case *core_v1.Namespace:
+	case *core_v1.ResourceQuota:
 		return model.ObservableNamespace
 	case *apps_v1.Deployment:
 		return model.ObservableDeployment
