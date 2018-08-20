@@ -10,22 +10,12 @@ import (
 )
 
 var (
-	addedIndex = mgo.Index{
+	addedDeletedIndex = mgo.Index{
 		Name:     "unique_resource_added",
 		Key:      []string{"eventtype", "uid"},
 		DropDups: true,
 		PartialFilter: bson.M{
-			"eventtype": watch.Added,
-		},
-		Unique: true,
-	}
-
-	deletedIndex = mgo.Index{
-		Name:     "unique_resource_deleted",
-		Key:      []string{"eventtype", "uid"},
-		DropDups: true,
-		PartialFilter: bson.M{
-			"eventtype": watch.Deleted,
+			"eventtype": bson.M{"$in": []watch.EventType{watch.Added, watch.Deleted}},
 		},
 		Unique: true,
 	}
@@ -37,10 +27,7 @@ func (s *Storage) ensureIndexes() error {
 
 	{
 		collection := s.db.C(EventsCollection)
-		if err := collection.EnsureIndex(addedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndex(deletedIndex); err != nil {
+		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}
