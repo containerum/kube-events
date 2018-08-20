@@ -88,8 +88,9 @@ func (rb *RecordBuffer) insertRecords() {
 			}
 
 			// replace a buffer with empty one
+			newBuf := make([]model.Record, 0, rb.cfg.BufferCap)
 			rb.bufferMu.Lock()
-			rb.buffer = make([]model.Record, 0, rb.cfg.BufferCap)
+			rb.buffer = newBuf
 			rb.bufferMu.Unlock()
 
 			// perform bulk insert
