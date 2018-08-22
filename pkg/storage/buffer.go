@@ -64,7 +64,7 @@ func (rb *RecordBuffer) readRecords() {
 			rb.buffer = append(rb.buffer, record)
 			rb.bufferMu.Unlock()
 		case <-rb.readStop:
-			break
+			return
 		}
 	}
 }
@@ -73,7 +73,7 @@ func (rb *RecordBuffer) insertRecords() {
 	for {
 		select {
 		case <-rb.insertStop:
-			break
+			return
 		case <-rb.insertTimer.C:
 			// get a buffer length and copy slice pointer (it may be replaced in RecordBuffer)
 			rb.bufferMu.Lock()
