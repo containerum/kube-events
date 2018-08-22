@@ -15,7 +15,7 @@ var (
 		Key:      []string{"eventtype", "uid"},
 		DropDups: true,
 		PartialFilter: bson.M{
-			"eventtype": bson.M{"$in": []watch.EventType{watch.Added, watch.Deleted}},
+			"eventtype": watch.Added,
 		},
 		Unique: true,
 	}
