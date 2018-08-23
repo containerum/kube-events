@@ -105,6 +105,13 @@ var (
 		Usage:   "Events buffer to storage flush period.",
 		Value:   30 * time.Second,
 	}
+
+	connectTimeoutFlag = cli.DurationFlag{
+		Name:    "connection-timeout",
+		EnvVars: []string{"CONNECTION_TIMEOUT"},
+		Usage:   "Kubernetes connection timeout.",
+		Value:   5 * time.Second,
+	}
 )
 
 func setupLogs(ctx *cli.Context) {
@@ -129,7 +136,7 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 		logrus.Info("Kube: Using InClusterConfig")
 		config, err = rest.InClusterConfig()
 	} else {
-		logrus.Info("Kube: Using config from", cfg)
+		logrus.Info("Kube: Using config from ", cfg)
 		config, err = clientcmd.BuildConfigFromFlags("", cfg)
 	}
 	if err != nil {

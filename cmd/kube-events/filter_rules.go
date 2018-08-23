@@ -80,3 +80,7 @@ func PVFilter(event watch.Event) bool {
 
 	return true
 }
+
+func ErrorFilter(event watch.Event) bool {
+	return event.Type != watch.Error
+}

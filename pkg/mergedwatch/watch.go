@@ -23,8 +23,8 @@ func NewMergedWatch(watchers ...watch.Interface) *MergedWatch {
 	wg.Add(len(watchers))
 	for _, w := range mw.watchers {
 		go mw.retranslator(w, &wg)
-		go mw.waitClose(&wg)
 	}
+	go mw.waitClose(&wg)
 	return &mw
 }
 
