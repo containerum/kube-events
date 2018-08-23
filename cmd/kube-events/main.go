@@ -66,7 +66,6 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 		Method: http.MethodGet,
 		URL:    reqUrl,
 	}
-	req.Write(os.Stdout)
 	defer ticker.Stop()
 	for {
 		select {
