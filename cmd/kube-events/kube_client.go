@@ -3,11 +3,13 @@ package main
 import (
 	"strings"
 
+	"github.com/containerum/kube-events/pkg/informerwatch"
 	"github.com/containerum/kube-events/pkg/mergedwatch"
 	"github.com/containerum/kube-events/pkg/transform"
 	"github.com/sirupsen/logrus"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -18,30 +20,14 @@ type Kube struct {
 }
 
 func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.Interface, error) {
-	rqWatch, err := k.CoreV1().ResourceQuotas("").Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
-	deplWatch, err := k.AppsV1().Deployments("").Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
-	eventWatch, err := k.CoreV1().Events("").Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
-	serviceWatch, err := k.CoreV1().Services("").Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
-	ingressWatch, err := k.ExtensionsV1beta1().Ingresses("").Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
-	pvWatch, err := k.CoreV1().PersistentVolumes().Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}
+	informerFactory := informers.NewSharedInformerFactory(k.Clientset, 0)
+
+	rqWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().ResourceQuotas().Informer())
+	deplWatch := informerwatch.NewInformerWatch(informerFactory.Apps().V1().Deployments().Informer())
+	eventWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Events().Informer())
+	serviceWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Services().Informer())
+	ingressWatch := informerwatch.NewInformerWatch(informerFactory.Extensions().V1beta1().Ingresses().Informer())
+	pvWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().PersistentVolumes().Informer())
 	/*nodeWatch, err := k.CoreV1().Nodes().Watch(listOptions)
 	if err != nil {
 		return nil, err
