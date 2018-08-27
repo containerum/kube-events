@@ -42,7 +42,7 @@ func NewInformerWatch(informer cache.SharedInformer) *InformerWatch {
 			}
 		},
 	})
-	iw.informer.Run(iw.stopChan)
+	go iw.informer.Run(iw.stopChan)
 	return iw
 }
 
