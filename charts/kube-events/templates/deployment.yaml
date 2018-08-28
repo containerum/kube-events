@@ -1,0 +1,61 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ template "chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{- if .Values.rbac.serviceAccountName }}
+      serviceAccountName: {{ .Values.rbac.serviceAccountName }}
+      {{- else }}
+      serviceAccountName: {{ .Release.Name }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $key, $val := .Values.env.global }}
+            - name: {{ $key  }}
+              value: {{ $val | quote }}
+            {{- end }}
+
+            {{- if .Values.env.local.MONGO_ADDRS }}
+            - name: MONGO_ADDRS
+              value: "{{ .Values.env.local.MONGO_ADDRS }}"
+            {{- else }}
+            - name: MONGO_ADDRS
+              value: "{{ .Release.Name }}-mongodb:27017"
+            {{- end }}
+
+            {{- if .Values.env.local.MONGO_PASSWORD }}
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: mongodb-password
+            {{- else if .Values.tags.platformdb }}
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mongodb
+                  key: mongodb-password
+            {{- end }}
+      {{- with .Values.image.secret }}
+      imagePullSecrets:
+      - name: {{ . }}
+      {{- end }}

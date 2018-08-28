@@ -1,0 +1,6 @@
+dependencies:
+  - name: mongodb
+    version: "3.0.4"
+    repository: https://charts.containerum.io
+    tags:
+      - db
