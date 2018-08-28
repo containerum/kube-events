@@ -1,0 +1,36 @@
+tags:
+  db: true
+  platformdb: false
+
+replicaCount: 1
+
+image:
+  repository: containerum/kube-events
+  tag: v1.0.0
+  pullPolicy: Always
+  secret:
+
+rbac:
+  serviceAccountName: null
+
+env:
+  local:
+    MONGO_ADDRS: "mongo-mongodb.mongo.svc:27017"
+    MONGO_PASSWORD:
+  global:
+    MONGO_USER: "events_user"
+    MONGO_DATABASE: "events"
+    BUFFER_FLUSH_PERIOD: "30s"
+    BUFFER_MIN_INSERT_EVENTS: "10"
+    DEBUG: "false"
+    TEXT_LOG: "true"
+    MONGO_COLLECTION_MAX_DOCS: "500"
+
+mongodb:
+  persistence:
+    enabled: false
+  image:
+    pullPolicy: IfNotPresent
+  mongodbUsername: mongo
+  mongodbDatabase: events
+  # mongodbPassword: password

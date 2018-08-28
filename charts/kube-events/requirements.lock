@@ -1,0 +1,6 @@
+dependencies:
+- name: mongodb
+  repository: https://charts.containerum.io
+  version: 3.0.4
+digest: sha256:7502ceae6320714606fe1969651c44603782a3bdbde7ec1ec1bde35cecb449e2
+generated: 2018-08-28T12:59:06.398472931+03:00
