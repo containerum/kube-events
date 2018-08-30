@@ -14,7 +14,7 @@ const (
 	EventsCollection         = "events"
 	DeploymentCollection     = "deployments"
 	ServiceCollection        = "services"
-	IngressCollection        = "ingress"
+	IngressCollection        = "ingresses"
 	PVCollection             = "volumes"
 )
 
