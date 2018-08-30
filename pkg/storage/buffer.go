@@ -85,7 +85,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 			rb.bufferMu.Unlock()
 
 			if bufLen < rb.cfg.MinInsertEvents {
-				rb.log.Infof("Wanted minimum %d records to be inserted, collected %d",
+				rb.log.Debugf("Wanted minimum %d records to be inserted, collected %d",
 					rb.cfg.MinInsertEvents, bufLen)
 				continue
 			}
@@ -98,7 +98,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 
 			// perform bulk insert
 			go func() {
-				rb.log.Infof("Inserting %d events", bufLen)
+				rb.log.Debugf("Inserting %d events", bufLen)
 				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
 					rb.log.WithError(err).Error("BulkInsert failed")
