@@ -9,7 +9,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const EventsCollection = "events"
+const (
+	ResourceQuotasCollection = "namespaces"
+	EventsCollection         = "events"
+	DeploymentCollection     = "deployments"
+	ServiceCollection        = "services"
+	IngressCollection        = "ingresses"
+	PVCollection             = "volumes"
+)
+
+var collections = []string{
+	ResourceQuotasCollection,
+	EventsCollection,
+	DeploymentCollection,
+	ServiceCollection,
+	IngressCollection,
+	PVCollection,
+}
 
 type Config struct {
 	mgo.DialInfo
@@ -44,7 +60,22 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 
 	if cfg.CollectionSize > 0 {
-		if err := storage.createCappedCollection(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCappedCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(ResourceQuotasCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(ServiceCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(PVCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}
@@ -56,38 +87,18 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	return storage, nil
 }
 
-func (s *Storage) createCappedCollection(name string, size uint64, maxDocs uint) error {
-	s.log.WithFields(logrus.Fields{
-		"name":     name,
-		"size":     size,
-		"max_docs": maxDocs,
-	}).Debugf("Create capped collection")
-	// bson.D not working here (gives "command not found: '0'"), why?
-	return s.db.Run(struct {
-		Create string `bson:"create"`
-		Capped bool   `bson:"capped"`
-		Size   uint64 `bson:"size"`
-		Max    uint   `bson:"max,omitempty"`
-	}{
-		Create: name,
-		Capped: true,
-		Size:   size,
-		Max:    maxDocs,
-	}, nil)
-}
-
-func (s *Storage) Insert(r *model.Record) error {
+func (s *Storage) Insert(r *model.Record, collection string) error {
 	s.log.Debugf("Insert single record")
-	return s.db.C(EventsCollection).Insert(r)
+	return s.db.C(collection).Insert(r)
 }
 
-func (s *Storage) BulkInsert(r []model.Record) error {
+func (s *Storage) BulkInsert(r []model.Record, collection string) error {
 	s.log.WithField("record_count", len(r)).Debugf("Bulk insert")
 	docs := make([]interface{}, len(r))
 	for i, record := range r {
 		docs[i] = record
 	}
-	bulk := s.db.C(EventsCollection).Bulk()
+	bulk := s.db.C(collection).Bulk()
 	bulk.Unordered()
 	bulk.Insert(docs...)
 	result, err := bulk.Run()
@@ -103,17 +114,20 @@ func (s *Storage) BulkInsert(r []model.Record) error {
 
 func (s *Storage) Cleanup(deleteBefore time.Time) error {
 	s.log.WithField("delete_before", deleteBefore).Debugf("Cleanup")
-	bulk := s.db.C(EventsCollection).Bulk()
-	bulk.Unordered()
-	bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
-	result, err := bulk.Run()
-	if err != nil {
-		return err
+	for _, col := range collections {
+		bulk := s.db.C(col).Bulk()
+		bulk.Unordered()
+		bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
+		result, err := bulk.Run()
+		if err != nil {
+			return err
+		}
+		s.log.WithFields(logrus.Fields{
+			"matched":    result.Matched,
+			"modified":   result.Modified,
+			"collection": col,
+		}).Debug("Cleanup run")
 	}
-	s.log.WithFields(logrus.Fields{
-		"matched":  result.Matched,
-		"modified": result.Modified,
-	}).Debug("Cleanup run")
 	return nil
 }
 

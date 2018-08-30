@@ -17,7 +17,7 @@ type Deployment struct {
 
 	model.Deployment `bson:",inline"`
 
-	*Event `bson:",omitempty"`
+	*Event `bson:",inline,omitempty"`
 }
 
 // Pod represents observable deployment data.

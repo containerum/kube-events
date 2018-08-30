@@ -1,13 +1,21 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"text/tabwriter"
+	"time"
+
+	"github.com/containerum/kube-events/pkg/storage/mongodb"
 
 	"github.com/containerum/kube-events/pkg/model"
 	"github.com/containerum/kube-events/pkg/transform"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -40,6 +48,51 @@ func printFlags(ctx *cli.Context) error {
 	return w.Flush()
 }
 
+func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stopChan <-chan struct{}) {
+	ticker := time.NewTicker(pingPeriod)
+	httpClient := http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+		Timeout: client.config.Timeout,
+	}
+	reqUrl, err := url.Parse(client.config.Host)
+	if err != nil {
+		errChan <- err
+		return
+	}
+	reqUrl.Path = "/healthz"
+	req := http.Request{
+		Method: http.MethodGet,
+		URL:    reqUrl,
+	}
+	defer ticker.Stop()
+	for {
+		select {
+		case <-stopChan:
+			return
+		case <-ticker.C:
+			logrus.Debug("Ping kube ", req.URL)
+			resp, err := httpClient.Do(&req)
+			if err != nil {
+				errChan <- err
+				continue
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				errChan <- err
+				continue
+			}
+			if resp.StatusCode != http.StatusOK || string(body) != "ok" {
+				errChan <- fmt.Errorf("%s", body)
+			}
+		}
+	}
+}
+
 func action(ctx *cli.Context) error {
 	setupLogs(ctx)
 
@@ -47,11 +100,11 @@ func action(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	watcher, err := kubeClient.WatchSupportedResources(defaultListOptions)
+
+	watchers, err := kubeClient.WatchSupportedResources()
 	if err != nil {
 		return err
 	}
-	defer watcher.Stop()
 
 	mongoStorage, err := setupMongo(ctx)
 	if err != nil {
@@ -59,16 +112,74 @@ func action(ctx *cli.Context) error {
 	}
 	defer mongoStorage.Close()
 
-	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watcher.ResultChan()))
+	//Namespaces
+	defer watchers.ResourceQuotas.Stop()
+	nsBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.ResourceQuotas.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer nsBuffer.Stop()
+	go nsBuffer.RunCollection(mongodb.ResourceQuotasCollection)
+
+	//Deployments
+	defer watchers.Deployments.Stop()
+	deplBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Deployments.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer deplBuffer.Stop()
+	go deplBuffer.RunCollection(mongodb.DeploymentCollection)
+
+	//Pod events
+	defer watchers.Events.Stop()
+	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Events.ResultChan()))
 	if err != nil {
 		return err
 	}
 	defer eventBuffer.Stop()
-	go eventBuffer.RunCollection()
+	go eventBuffer.RunCollection(mongodb.EventsCollection)
+
+	//Services
+	defer watchers.Services.Stop()
+	svcBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Services.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer svcBuffer.Stop()
+	go svcBuffer.RunCollection(mongodb.ServiceCollection)
+
+	//Ingresses
+	defer watchers.Ingresses.Stop()
+	ingrBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Ingresses.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer ingrBuffer.Stop()
+	go ingrBuffer.RunCollection(mongodb.IngressCollection)
+
+	//Volumes
+	defer watchers.PVs.Stop()
+	pvBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVs.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer pvBuffer.Stop()
+	go pvBuffer.RunCollection(mongodb.PVCollection)
+
+	pingStopChan := make(chan struct{})
+	defer close(pingStopChan)
+	pingErrChan := make(chan error)
+	go pingKube(kubeClient, 5*time.Second, pingErrChan, pingStopChan)
 
 	sigch := make(chan os.Signal)
 	signal.Notify(sigch, os.Kill, os.Interrupt)
-	<-sigch
+	select {
+	case <-sigch:
+		return nil
+	case err := <-pingErrChan:
+		logrus.WithError(err).Errorf("Ping kube failed")
+		os.Exit(1)
+	}
 
 	return nil
 }
@@ -92,6 +203,7 @@ func main() {
 			&bufferCapacityFlag,
 			&bufferFlushPeriodFlag,
 			&bufferMinInsertEventsFlag,
+			&connectTimeoutFlag,
 		},
 		Before: printFlags,
 		Action: action,

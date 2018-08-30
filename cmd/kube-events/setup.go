@@ -89,14 +89,14 @@ var (
 		Name:    "buffer-capacity",
 		EnvVars: []string{"BUFFER_CAPACITY"},
 		Usage:   "Events buffer capacity (pre-allocated size).",
-		Value:   500,
+		Value:   200,
 	}
 
 	bufferMinInsertEventsFlag = cli.IntFlag{
 		Name:    "buffer-min-insert-events",
 		EnvVars: []string{"BUFFER_MIN_INSERT_EVENTS"},
 		Usage:   "Minimal count of events in buffer to perform insert operation.",
-		Value:   10,
+		Value:   5,
 	}
 
 	bufferFlushPeriodFlag = cli.DurationFlag{
@@ -104,6 +104,13 @@ var (
 		EnvVars: []string{"BUFFER_FLUSH_PERIOD"},
 		Usage:   "Events buffer to storage flush period.",
 		Value:   30 * time.Second,
+	}
+
+	connectTimeoutFlag = cli.DurationFlag{
+		Name:    "connection-timeout",
+		EnvVars: []string{"CONNECTION_TIMEOUT"},
+		Usage:   "Kubernetes connection timeout.",
+		Value:   5 * time.Second,
 	}
 )
 
@@ -129,7 +136,7 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 		logrus.Info("Kube: Using InClusterConfig")
 		config, err = rest.InClusterConfig()
 	} else {
-		logrus.Info("Kube: Using config from", cfg)
+		logrus.Info("Kube: Using config from ", cfg)
 		config, err = clientcmd.BuildConfigFromFlags("", cfg)
 	}
 	if err != nil {
