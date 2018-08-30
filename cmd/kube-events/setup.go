@@ -96,7 +96,7 @@ var (
 		Name:    "buffer-min-insert-events",
 		EnvVars: []string{"BUFFER_MIN_INSERT_EVENTS"},
 		Usage:   "Minimal count of events in buffer to perform insert operation.",
-		Value:   10,
+		Value:   5,
 	}
 
 	bufferFlushPeriodFlag = cli.DurationFlag{

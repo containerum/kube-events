@@ -9,7 +9,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const EventsCollection = "events"
+const (
+	ResourceQuotasCollection = "namespaces"
+	EventsCollection         = "events"
+	DeploymentCollection     = "deployments"
+	ServiceCollection        = "services"
+	IngressCollection        = "ingress"
+	PVCollection             = "volumes"
+)
 
 type Config struct {
 	mgo.DialInfo
@@ -47,6 +54,9 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 		if err := storage.createCappedCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
+		if err := storage.createCappedCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := storage.ensureIndexes(); err != nil {
@@ -56,18 +66,18 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	return storage, nil
 }
 
-func (s *Storage) Insert(r *model.Record) error {
+func (s *Storage) Insert(r *model.Record, collection string) error {
 	s.log.Debugf("Insert single record")
-	return s.db.C(EventsCollection).Insert(r)
+	return s.db.C(collection).Insert(r)
 }
 
-func (s *Storage) BulkInsert(r []model.Record) error {
+func (s *Storage) BulkInsert(r []model.Record, collection string) error {
 	s.log.WithField("record_count", len(r)).Debugf("Bulk insert")
 	docs := make([]interface{}, len(r))
 	for i, record := range r {
 		docs[i] = record
 	}
-	bulk := s.db.C(EventsCollection).Bulk()
+	bulk := s.db.C(collection).Bulk()
 	bulk.Unordered()
 	bulk.Insert(docs...)
 	result, err := bulk.Run()
