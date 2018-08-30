@@ -89,14 +89,14 @@ var (
 		Name:    "buffer-capacity",
 		EnvVars: []string{"BUFFER_CAPACITY"},
 		Usage:   "Events buffer capacity (pre-allocated size).",
-		Value:   500,
+		Value:   200,
 	}
 
 	bufferMinInsertEventsFlag = cli.IntFlag{
 		Name:    "buffer-min-insert-events",
 		EnvVars: []string{"BUFFER_MIN_INSERT_EVENTS"},
 		Usage:   "Minimal count of events in buffer to perform insert operation.",
-		Value:   10,
+		Value:   5,
 	}
 
 	bufferFlushPeriodFlag = cli.DurationFlag{

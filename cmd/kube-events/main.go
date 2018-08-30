@@ -11,6 +11,8 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/containerum/kube-events/pkg/storage/mongodb"
+
 	"github.com/containerum/kube-events/pkg/model"
 	"github.com/containerum/kube-events/pkg/transform"
 	"github.com/sirupsen/logrus"
@@ -99,15 +101,10 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	options := defaultListOptions
-	timeout := int64(ctx.Duration(connectTimeoutFlag.Name).Seconds())
-	options.TimeoutSeconds = &timeout
-	watcher, err := kubeClient.WatchSupportedResources(defaultListOptions)
+	watchers, err := kubeClient.WatchSupportedResources()
 	if err != nil {
 		return err
 	}
-	watcher = transform.NewFilteredWatch(watcher, ErrorFilter)
-	defer watcher.Stop()
 
 	mongoStorage, err := setupMongo(ctx)
 	if err != nil {
@@ -115,12 +112,59 @@ func action(ctx *cli.Context) error {
 	}
 	defer mongoStorage.Close()
 
-	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watcher.ResultChan()))
+	//Namespaces
+	defer watchers.ResourceQuotas.Stop()
+	nsBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.ResourceQuotas.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer nsBuffer.Stop()
+	go nsBuffer.RunCollection(mongodb.ResourceQuotasCollection)
+
+	//Deployments
+	defer watchers.Deployments.Stop()
+	deplBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Deployments.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer deplBuffer.Stop()
+	go deplBuffer.RunCollection(mongodb.DeploymentCollection)
+
+	//Pod events
+	defer watchers.Events.Stop()
+	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Events.ResultChan()))
 	if err != nil {
 		return err
 	}
 	defer eventBuffer.Stop()
-	go eventBuffer.RunCollection()
+	go eventBuffer.RunCollection(mongodb.EventsCollection)
+
+	//Services
+	defer watchers.Services.Stop()
+	svcBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Services.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer svcBuffer.Stop()
+	go svcBuffer.RunCollection(mongodb.ServiceCollection)
+
+	//Ingresses
+	defer watchers.Ingresses.Stop()
+	ingrBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Ingresses.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer ingrBuffer.Stop()
+	go ingrBuffer.RunCollection(mongodb.IngressCollection)
+
+	//Volumes
+	defer watchers.PVs.Stop()
+	pvBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVs.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer pvBuffer.Stop()
+	go pvBuffer.RunCollection(mongodb.PVCollection)
 
 	pingStopChan := make(chan struct{})
 	defer close(pingStopChan)

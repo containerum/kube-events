@@ -3,11 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/containerum/kube-events/pkg/informerwatch"
-	"github.com/containerum/kube-events/pkg/mergedwatch"
 	"github.com/containerum/kube-events/pkg/transform"
+
+	"github.com/containerum/kube-events/pkg/informerwatch"
 	"github.com/sirupsen/logrus"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -19,7 +18,16 @@ type Kube struct {
 	config *rest.Config
 }
 
-func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.Interface, error) {
+type Watchers struct {
+	ResourceQuotas watch.Interface //Namespaces
+	Deployments    watch.Interface
+	Events         watch.Interface //Pods
+	Services       watch.Interface
+	Ingresses      watch.Interface
+	PVs            watch.Interface //Volumes
+}
+
+func (k *Kube) WatchSupportedResources() (Watchers, error) {
 	informerFactory := informers.NewSharedInformerFactory(k.Clientset, 0)
 
 	rqWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().ResourceQuotas().Informer())
@@ -28,10 +36,6 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 	serviceWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Services().Informer())
 	ingressWatch := informerwatch.NewInformerWatch(informerFactory.Extensions().V1beta1().Ingresses().Informer())
 	pvWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().PersistentVolumes().Informer())
-	/*nodeWatch, err := k.CoreV1().Nodes().Watch(listOptions)
-	if err != nil {
-		return nil, err
-	}*/
 
 	logrus.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
@@ -40,17 +44,14 @@ func (k *Kube) WatchSupportedResources(listOptions meta_v1.ListOptions) (watch.I
 		"Service",
 		"Ingress",
 		"PersistentVolume",
-		//"Node",
 	}, ","))
 
-	mw := mergedwatch.NewMergedWatch(
-		transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter),
-		transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter),
-		transform.NewFilteredWatch(eventWatch, EventFilter),
-		serviceWatch,
-		ingressWatch,
-		transform.NewFilteredWatch(pvWatch, PVFilter),
-		//nodeWatch,
-	)
-	return mw, nil
+	return Watchers{
+		ResourceQuotas: transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter, ErrorFilter),
+		Deployments:    transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter, ErrorFilter),
+		Events:         transform.NewFilteredWatch(eventWatch, EventFilter, ErrorFilter),
+		Services:       transform.NewFilteredWatch(serviceWatch, ErrorFilter),
+		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
+		PVs:            transform.NewFilteredWatch(pvWatch, PVFilter, ErrorFilter),
+	}, nil
 }

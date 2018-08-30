@@ -9,11 +9,11 @@ import (
 )
 
 type EventInserter interface {
-	Insert(r *model.Record) error
+	Insert(r *model.Record, collection string) error
 }
 
 type EventBulkInserter interface {
-	BulkInsert(r []model.Record) error
+	BulkInsert(r []model.Record, collection string) error
 }
 
 type RecordBufferConfig struct {
@@ -72,7 +72,7 @@ func (rb *RecordBuffer) readRecords() {
 	}
 }
 
-func (rb *RecordBuffer) insertRecords() {
+func (rb *RecordBuffer) insertRecords(collection string) {
 	for {
 		select {
 		case <-rb.insertStop:
@@ -85,7 +85,7 @@ func (rb *RecordBuffer) insertRecords() {
 			rb.bufferMu.Unlock()
 
 			if bufLen < rb.cfg.MinInsertEvents {
-				rb.log.Infof("Wanted minimum %d records to be inserted, collected %d",
+				rb.log.Debugf("Wanted minimum %d records to be inserted, collected %d",
 					rb.cfg.MinInsertEvents, bufLen)
 				continue
 			}
@@ -98,8 +98,8 @@ func (rb *RecordBuffer) insertRecords() {
 
 			// perform bulk insert
 			go func() {
-				rb.log.Infof("Inserting %d events", bufLen)
-				err := rb.cfg.Storage.BulkInsert(oldBuf)
+				rb.log.Debugf("Inserting %d events", bufLen)
+				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
 					rb.log.WithError(err).Error("BulkInsert failed")
 				}
@@ -108,10 +108,10 @@ func (rb *RecordBuffer) insertRecords() {
 	}
 }
 
-func (rb *RecordBuffer) RunCollection() {
+func (rb *RecordBuffer) RunCollection(collection string) {
 	rb.log.Debug("Starting reading/inserting records")
 	go rb.readRecords()
-	go rb.insertRecords()
+	go rb.insertRecords(collection)
 }
 
 func (rb *RecordBuffer) Stop() {
