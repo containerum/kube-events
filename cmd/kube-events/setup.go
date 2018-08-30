@@ -89,7 +89,7 @@ var (
 		Name:    "buffer-capacity",
 		EnvVars: []string{"BUFFER_CAPACITY"},
 		Usage:   "Events buffer capacity (pre-allocated size).",
-		Value:   500,
+		Value:   200,
 	}
 
 	bufferMinInsertEventsFlag = cli.IntFlag{

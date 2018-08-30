@@ -18,6 +18,15 @@ const (
 	PVCollection             = "volumes"
 )
 
+var collections = []string{
+	ResourceQuotasCollection,
+	EventsCollection,
+	DeploymentCollection,
+	ServiceCollection,
+	IngressCollection,
+	PVCollection,
+}
+
 type Config struct {
 	mgo.DialInfo
 
@@ -57,6 +66,18 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 		if err := storage.createCappedCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
+		if err := storage.createCappedCollectionIfNotExist(ResourceQuotasCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(ServiceCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(PVCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := storage.ensureIndexes(); err != nil {
@@ -93,17 +114,20 @@ func (s *Storage) BulkInsert(r []model.Record, collection string) error {
 
 func (s *Storage) Cleanup(deleteBefore time.Time) error {
 	s.log.WithField("delete_before", deleteBefore).Debugf("Cleanup")
-	bulk := s.db.C(EventsCollection).Bulk()
-	bulk.Unordered()
-	bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
-	result, err := bulk.Run()
-	if err != nil {
-		return err
+	for _, col := range collections {
+		bulk := s.db.C(col).Bulk()
+		bulk.Unordered()
+		bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
+		result, err := bulk.Run()
+		if err != nil {
+			return err
+		}
+		s.log.WithFields(logrus.Fields{
+			"matched":    result.Matched,
+			"modified":   result.Modified,
+			"collection": col,
+		}).Debug("Cleanup run")
 	}
-	s.log.WithFields(logrus.Fields{
-		"matched":  result.Matched,
-		"modified": result.Modified,
-	}).Debug("Cleanup run")
 	return nil
 }
 
