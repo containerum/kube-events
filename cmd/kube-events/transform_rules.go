@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/kube-events/pkg/model"
-	"github.com/globalsign/mgo/bson"
 	apps_v1 "k8s.io/api/apps/v1"
 	core_v1 "k8s.io/api/core/v1"
 	extensions_v1beta1 "k8s.io/api/extensions/v1beta1"
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -46,165 +42,153 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	}
 }
 
-func ExtractMetadata(event watch.Event) model.Metadata {
-	mdAccessor := meta.NewAccessor()
-	namespace, err := mdAccessor.Namespace(event.Object)
-	if err != nil {
-		panic(err)
-	}
-	name, err := mdAccessor.Name(event.Object)
-	if err != nil {
-		panic(err)
-	}
-	uid, err := mdAccessor.UID(event.Object)
-	if err != nil {
-		panic(err)
-	}
-	return model.Metadata{
-		ID:           bson.NewObjectId(),
-		EventType:    event.Type,
-		ResourceType: ObservableTypeFromObject(event.Object),
-		Timestamp:    time.Now().UTC(),
-		UID:          string(uid),
-		Namespace:    namespace,
-		Name:         name,
-	}
-}
-
-func extractResourceList(krl core_v1.ResourceList) kubeClientModel.Resource {
-	return kubeClientModel.Resource{
-		CPU:    uint(krl.Cpu().MilliValue()),
-		Memory: uint(krl.Memory().ScaledValue(resource.Mega)),
-	}
-}
-
-func extractEvent(e *core_v1.Event) *model.Event {
-	return &model.Event{
-		Reason:  e.Reason,
-		Type:    e.Type,
-		Message: e.Message,
-		Count:   int(e.Count),
-	}
-}
-
-func MakeNamespaceRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
+func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
 	rq := event.Object.(*core_v1.ResourceQuota)
-	ret.Metadata.Name = ret.Namespace
-	ret.Object = &model.Namespace{
-		Quota: kubeClientModel.Resources{
-			Hard: extractResourceList(rq.Spec.Hard),
-			Used: func() *kubeClientModel.Resource {
-				rl := extractResourceList(rq.Status.Used)
-				return &rl
-			}(),
+	ret := kubeClientModel.Event{
+		Time:         time.Now().Format(time.RFC3339),
+		Kind:         kubeClientModel.EventInfo,
+		ResourceName: rq.Namespace,
+		ResourceUID:  string(rq.UID),
+		ResourceType: kubeClientModel.TypeNamespace,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = rq.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
+	}
+	return ret
+}
+
+func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
+	depl := event.Object.(*apps_v1.Deployment)
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      depl.Name,
+		ResourceUID:       string(depl.UID),
+		ResourceNamespace: depl.Namespace,
+		ResourceType:      kubeClientModel.TypeDeployment,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = depl.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
+	}
+	return ret
+}
+
+func MakePodRecord(event watch.Event) kubeClientModel.Event {
+	kubeEvent := event.Object.(*core_v1.Event)
+	ret := kubeClientModel.Event{
+		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
+		ResourceName:      kubeEvent.InvolvedObject.Name,
+		ResourceUID:       string(kubeEvent.UID),
+		ResourceNamespace: kubeEvent.Namespace,
+		ResourceType:      kubeClientModel.TypePod,
+		Message:           kubeEvent.Message,
+		Details: map[string]string{
+			"reason": kubeEvent.Reason,
 		},
 	}
-	return ret
-}
-
-func MakeDeployRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
-	var deploy model.Deployment
-	switch event.Object.(type) {
-	case *apps_v1.Deployment:
-		var err error
-		kubeDeploy := event.Object.(*apps_v1.Deployment)
-		parsedDeploy, err := kubeAPIModel.ParseKubeDeployment(kubeDeploy, false)
-		if err != nil {
-			panic(err)
-		}
-		deploy = model.Deployment{
-			Generation: kubeDeploy.Generation,
-
-			Deployment: *parsedDeploy,
-		}
-	case *core_v1.Event:
-		kubeEvent := event.Object.(*core_v1.Event)
-		deploy = model.Deployment{
-			Event: extractEvent(kubeEvent),
-		}
-
-		// fix object reference
-		ret.UID = string(kubeEvent.InvolvedObject.UID)
-		ret.Name = kubeEvent.InvolvedObject.Name
-		ret.Namespace = kubeEvent.InvolvedObject.Namespace
+	switch kubeEvent.Reason {
+	case "Failed", "BackOff":
+		ret.Kind = kubeClientModel.EventWarning
 	default:
-		panic(fmt.Sprintf("Invalid event type %T for deploy", event.Object))
-	}
-
-	ret.Object = &deploy
-	return ret
-}
-
-func MakePodRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
-	kubeEvent := event.Object.(*core_v1.Event)
-	ret.Object = &model.Pod{
-		Event: extractEvent(kubeEvent),
-	}
-
-	// fix object reference
-	ret.UID = string(kubeEvent.InvolvedObject.UID)
-	ret.Name = kubeEvent.InvolvedObject.Name
-	ret.Namespace = kubeEvent.InvolvedObject.Namespace
-	return ret
-}
-
-func MakeServiceRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
-
-	parsedService, err := kubeAPIModel.ParseKubeService(event.Object.(*core_v1.Service), false)
-	if err != nil {
-		panic(err)
-	}
-	ret.Object = &model.Service{
-		Service: *parsedService.Service,
+		ret.Kind = kubeClientModel.EventInfo
 	}
 	return ret
 }
 
-func MakeIngressRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
-
-	parsedIngress, err := kubeAPIModel.ParseKubeIngress(event.Object.(*extensions_v1beta1.Ingress), false)
-	if err != nil {
-		panic(err)
+func MakeServiceRecord(event watch.Event) kubeClientModel.Event {
+	svc := event.Object.(*core_v1.Service)
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      svc.Name,
+		ResourceUID:       string(svc.UID),
+		ResourceNamespace: svc.Namespace,
+		ResourceType:      kubeClientModel.TypeService,
 	}
-	ret.Object = &model.Ingress{
-		Ingress: *parsedIngress,
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = svc.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
 	}
 	return ret
 }
 
-func MakePVRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
+func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
+	ingr := event.Object.(*extensions_v1beta1.Ingress)
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      ingr.Name,
+		ResourceUID:       string(ingr.UID),
+		ResourceNamespace: ingr.Namespace,
+		ResourceType:      kubeClientModel.TypeIngress,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = ingr.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
+	}
+	return ret
+}
+
+func MakePVRecord(event watch.Event) kubeClientModel.Event {
 	pv := event.Object.(*core_v1.PersistentVolume)
-	storage := pv.Spec.Capacity["storage"]
-
-	ret.Object = &model.PersistentVolume{
-		Phase:       string(pv.Status.Phase),
-		Capacity:    int(storage.ScaledValue(resource.Giga)),
-		AccessModes: pv.Spec.AccessModes,
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      pv.Name,
+		ResourceUID:       string(pv.UID),
+		ResourceNamespace: pv.Namespace,
+		ResourceType:      kubeClientModel.TypeVolume,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = pv.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
 	}
 	return ret
 }
 
-func MakeNodeRecord(event watch.Event) model.Record {
-	var ret model.Record
-	ret.Metadata = ExtractMetadata(event)
+func MakeNodeRecord(event watch.Event) kubeClientModel.Event {
+	//TODO
 	node := event.Object.(*core_v1.Node)
-
-	ret.Object = &model.Node{
-		Role:       node.Labels["role"],
-		Addresses:  node.Status.Addresses,
-		Conditions: node.Status.Conditions,
+	ret := kubeClientModel.Event{
+		Time:         time.Now().Format(time.RFC3339),
+		Kind:         kubeClientModel.EventInfo,
+		ResourceName: node.Name,
+		ResourceType: kubeClientModel.TypeNode,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
 	}
 	return ret
 }

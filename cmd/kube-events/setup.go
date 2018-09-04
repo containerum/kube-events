@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/containerum/kube-events/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/kube-events/pkg/storage"
 	"github.com/containerum/kube-events/pkg/storage/mongodb"
 	"github.com/globalsign/mgo"
@@ -76,7 +76,7 @@ var (
 	mongoCollectionSizeFlag = cli.Uint64Flag{
 		Name:    "mongo-collection-size",
 		EnvVars: []string{"MONGO_COLLECTION_SIZE"},
-		Usage:   "Capped collection size in bytes. If unspecified, capped collections will not be used",
+		Usage:   "Capped collection size in bytes. If unspecified, capped collections will not be used.",
 	}
 
 	mongoCollectionMaxDocsFlag = cli.UintFlag{
@@ -179,7 +179,7 @@ func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
 	})
 }
 
-func setupBuffer(ctx *cli.Context, inserter storage.EventBulkInserter, collector <-chan model.Record) (*storage.RecordBuffer, error) {
+func setupBuffer(ctx *cli.Context, inserter storage.EventBulkInserter, collector <-chan kubeClientModel.Event) (*storage.RecordBuffer, error) {
 	return storage.NewRecordBuffer(storage.RecordBufferConfig{
 		Storage:         inserter,
 		BufferCap:       ctx.Int(bufferCapacityFlag.Name),

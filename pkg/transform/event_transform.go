@@ -1,22 +1,23 @@
 package transform
 
 import (
-	"github.com/containerum/kube-events/pkg/model"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/watch"
+
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 )
 
 type RuleSelector func(event watch.Event) string
 
-type Func func(event watch.Event) model.Record
+type Func func(event watch.Event) kubeClientModel.Event
 
 type EventTransformer struct {
 	RuleSelector RuleSelector
 	Rules        map[string]Func
 }
 
-func (et *EventTransformer) Output(input <-chan watch.Event) <-chan model.Record {
-	outCh := make(chan model.Record)
+func (et *EventTransformer) Output(input <-chan watch.Event) <-chan kubeClientModel.Event {
+	outCh := make(chan kubeClientModel.Event)
 	go func() {
 		for event := range input {
 			ruleSelector := et.RuleSelector(event)

@@ -3,7 +3,7 @@ package mongodb
 import (
 	"time"
 
-	"github.com/containerum/kube-events/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
@@ -87,12 +87,12 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	return storage, nil
 }
 
-func (s *Storage) Insert(r *model.Record, collection string) error {
+func (s *Storage) Insert(r *kubeClientModel.Event, collection string) error {
 	s.log.Debugf("Insert single record")
 	return s.db.C(collection).Insert(r)
 }
 
-func (s *Storage) BulkInsert(r []model.Record, collection string) error {
+func (s *Storage) BulkInsert(r []kubeClientModel.Event, collection string) error {
 	s.log.WithField("record_count", len(r)).Debugf("Bulk insert")
 	docs := make([]interface{}, len(r))
 	for i, record := range r {
