@@ -96,7 +96,7 @@ func MakePodRecord(event watch.Event) kubeClientModel.Event {
 		Message:           kubeEvent.Message,
 		Details: map[string]string{
 			"reason":     kubeEvent.Reason,
-			"deployment": kubeEvent.InvolvedObject.Name[:len(kubeEvent.InvolvedObject.Name)-17],
+			"deployment": kubeEvent.InvolvedObject.Name[:len(kubeEvent.InvolvedObject.Name)-16],
 		},
 	}
 	switch kubeEvent.Reason {
