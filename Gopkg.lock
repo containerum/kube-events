@@ -26,12 +26,12 @@
   version = "v3.5.1"
 
 [[projects]]
-  digest = "1:c75cb4737fd96e43c8d3715db6d7cc40d1279f94a4a86cab1eb2862ef581a87a"
+  digest = "1:39d80d4ff9f9f75c3359d47e85419a5a83d4d19901d1b6a243f52953cb2f6707"
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
   pruneopts = "NUT"
-  revision = "ea498c77baa0daf3a55d90d4160252c50c5cc687"
-  version = "v0.23.29"
+  revision = "e973fe1c16ef536c9b4a1ce107b1f6884f7d5e75"
+  version = "v0.23.30"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -306,7 +306,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
@@ -324,14 +324,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8270f14d85e8d36e852e018872ac923f7a2067648bfe8428d01be288818aa337"
+  digest = "1:663188f4f6bc9aef0bc8eb66295305f92c3cc11471eda03339597582e6a46b1e"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "2b024373dcd9800f0cae693839fac6ede8d64a8c"
+  revision = "ebe1bf3edb3325c393447059974de898d5133eb8"
 
 [[projects]]
   digest = "1:e33513a825fcd765e97b5de639a2f7547542d1a8245df0cef18e1fd390b778a9"
@@ -607,8 +607,6 @@
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/api/extensions/v1beta1",
-    "k8s.io/apimachinery/pkg/api/meta",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/types",

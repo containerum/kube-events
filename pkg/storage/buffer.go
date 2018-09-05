@@ -99,6 +99,10 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 			// perform bulk insert
 			go func() {
 				rb.log.Debugf("Inserting %d events", bufLen)
+				dateAdded := time.Now().Format(time.RFC3339)
+				for i := range oldBuf {
+					oldBuf[i].DateAdded = dateAdded
+				}
 				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
 					rb.log.WithError(err).Debug("BulkInsert failed")
