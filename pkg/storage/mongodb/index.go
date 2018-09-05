@@ -4,20 +4,28 @@ import (
 	"errors"
 	"strings"
 
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"k8s.io/apimachinery/pkg/watch"
 )
 
 var (
 	addedDeletedIndex = mgo.Index{
 		Name:     "unique_resource_added",
-		Key:      []string{"eventtype", "uid"},
+		Key:      []string{"eventname", "resourceuid"},
 		DropDups: true,
 		PartialFilter: bson.M{
-			"eventtype": watch.Added,
+			"eventname": kubeClientModel.ResourceCreated,
 		},
 		Unique: true,
+	}
+
+	uniqueEventsIndex = mgo.Index{
+		Name:     "unique_resourceuid",
+		Key:      []string{"resourceuid"},
+		DropDups: true,
+		Unique:   true,
 	}
 )
 
@@ -30,26 +38,29 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}
 
 	{
-		collection := s.db.C(EventsCollection)
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		collection := s.db.C(PodEventsCollection)
+		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}
@@ -59,13 +70,13 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}
@@ -75,15 +86,16 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
+
 	}
 
 	{
@@ -91,29 +103,46 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+
+	}
+
+	{
+		collection := s.db.C(PVCCollection)
+		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}
 
 	{
-		collection := s.db.C(PVCollection)
-		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
+		collection := s.db.C(PVCEventsCollection)
+		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype"); err != nil {
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("name"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventtype", "name"); err != nil {
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
 	}

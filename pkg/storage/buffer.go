@@ -4,16 +4,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/containerum/kube-events/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/sirupsen/logrus"
 )
 
 type EventInserter interface {
-	Insert(r *model.Record, collection string) error
+	Insert(r *kubeClientModel.Event, collection string) error
 }
 
 type EventBulkInserter interface {
-	BulkInsert(r []model.Record, collection string) error
+	BulkInsert(r []kubeClientModel.Event, collection string) error
 }
 
 type RecordBufferConfig struct {
@@ -21,14 +21,14 @@ type RecordBufferConfig struct {
 	BufferCap       int
 	InsertPeriod    time.Duration
 	MinInsertEvents int
-	Collector       <-chan model.Record
+	Collector       <-chan kubeClientModel.Event
 }
 
 type RecordBuffer struct {
 	cfg RecordBufferConfig
 
 	bufferMu sync.Mutex
-	buffer   []model.Record
+	buffer   []kubeClientModel.Event
 
 	readStop    chan struct{}
 	insertStop  chan struct{}
@@ -47,7 +47,7 @@ func NewRecordBuffer(cfg RecordBufferConfig) *RecordBuffer {
 
 	return &RecordBuffer{
 		cfg:         cfg,
-		buffer:      make([]model.Record, 0, cfg.BufferCap),
+		buffer:      make([]kubeClientModel.Event, 0, cfg.BufferCap),
 		readStop:    make(chan struct{}),
 		insertStop:  make(chan struct{}),
 		insertTimer: time.NewTicker(cfg.InsertPeriod),
@@ -91,7 +91,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 			}
 
 			// replace a buffer with empty one
-			newBuf := make([]model.Record, 0, rb.cfg.BufferCap)
+			newBuf := make([]kubeClientModel.Event, 0, rb.cfg.BufferCap)
 			rb.bufferMu.Lock()
 			rb.buffer = newBuf
 			rb.bufferMu.Unlock()
@@ -101,7 +101,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 				rb.log.Debugf("Inserting %d events", bufLen)
 				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
-					rb.log.WithError(err).Error("BulkInsert failed")
+					rb.log.WithError(err).Debug("BulkInsert failed")
 				}
 			}()
 		}

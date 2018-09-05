@@ -21,10 +21,11 @@ type Kube struct {
 type Watchers struct {
 	ResourceQuotas watch.Interface //Namespaces
 	Deployments    watch.Interface
-	Events         watch.Interface //Pods
+	PodEvents      watch.Interface //Pods
 	Services       watch.Interface
 	Ingresses      watch.Interface
-	PVs            watch.Interface //Volumes
+	PVCs           watch.Interface //Volumes
+	PVCEvents      watch.Interface
 }
 
 func (k *Kube) WatchSupportedResources() (Watchers, error) {
@@ -35,7 +36,7 @@ func (k *Kube) WatchSupportedResources() (Watchers, error) {
 	eventWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Events().Informer())
 	serviceWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Services().Informer())
 	ingressWatch := informerwatch.NewInformerWatch(informerFactory.Extensions().V1beta1().Ingresses().Informer())
-	pvWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().PersistentVolumes().Informer())
+	pvcWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().PersistentVolumeClaims().Informer())
 
 	logrus.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
@@ -49,9 +50,10 @@ func (k *Kube) WatchSupportedResources() (Watchers, error) {
 	return Watchers{
 		ResourceQuotas: transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter, ErrorFilter),
 		Deployments:    transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter, ErrorFilter),
-		Events:         transform.NewFilteredWatch(eventWatch, EventFilter, ErrorFilter),
+		PodEvents:      transform.NewFilteredWatch(eventWatch, PodEventsFilter, ErrorFilter),
 		Services:       transform.NewFilteredWatch(serviceWatch, ErrorFilter),
 		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
-		PVs:            transform.NewFilteredWatch(pvWatch, PVFilter, ErrorFilter),
+		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter, ErrorFilter),
+		PVCEvents:      transform.NewFilteredWatch(eventWatch, PVCEventsFilter, ErrorFilter),
 	}, nil
 }

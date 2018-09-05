@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  branch = "develop"
-  digest = "1:2c9a90178f94b57b04b23ded62a1e9f5d67dd80e5df509b6fad7d8c5b30d2acb"
-  name = "git.containerum.net/ch/kube-api"
-  packages = [
-    "pkg/kubeerrors",
-    "pkg/model",
-  ]
-  pruneopts = "NUT"
-  revision = "e763ce8c52048dfd9306a6c9d619e28106f27797"
-
-[[projects]]
   digest = "1:d8ebbd207f3d3266d4423ce4860c9f3794956306ded6c7ba312ecc69cdfbf04c"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -37,20 +26,12 @@
   version = "v3.5.1"
 
 [[projects]]
-  digest = "1:ce4ecbeb56e096bbd369438e2967df23d46db38dd9aaaf4576cb7e0c4ed36f3b"
-  name = "github.com/containerum/cherry"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "f4fe137f837222131dcefcfa49845d189b5fc6f2"
-  version = "v1.0.2"
-
-[[projects]]
-  digest = "1:8e19c83d9c6a0bc9ec1964332b31316d6c4b06e648b225da851713ee46a52855"
+  digest = "1:c75cb4737fd96e43c8d3715db6d7cc40d1279f94a4a86cab1eb2862ef581a87a"
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
   pruneopts = "NUT"
-  revision = "d9a1865782bb10b027248a9770a42a53ed11a423"
-  version = "v0.23.27"
+  revision = "ea498c77baa0daf3a55d90d4160252c50c5cc687"
+  version = "v0.23.29"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -184,14 +165,6 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:c92797409cc20b0c157de0db731ce089678ead9b2a04eddc7dad380bd1606624"
-  name = "github.com/google/uuid"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "e704694aed0ea004bb7eb1fc2e911d048a54606a"
 
 [[projects]]
   digest = "1:06a7dadb7b760767341ffb6c8d377238d68a1226f2b21b5d497d2e3f6ecf6b4e"
@@ -333,7 +306,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
+  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
 
 [[projects]]
   branch = "master"
@@ -351,14 +324,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e1498a6884b2564efe2a4c4aefce64eb4bc6a4666acfd42db044cf581db4d9cb"
+  digest = "1:8270f14d85e8d36e852e018872ac923f7a2067648bfe8428d01be288818aa337"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "d99a578cf41bfccdeaf48b0845c823a4b8b0ad5e"
+  revision = "2b024373dcd9800f0cae693839fac6ede8d64a8c"
 
 [[projects]]
   digest = "1:e33513a825fcd765e97b5de639a2f7547542d1a8245df0cef18e1fd390b778a9"
@@ -626,7 +599,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "git.containerum.net/ch/kube-api/pkg/model",
     "github.com/containerum/kube-client/pkg/model",
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
