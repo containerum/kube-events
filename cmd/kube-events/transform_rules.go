@@ -23,8 +23,8 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 		return model.ObservableService
 	case *extensions_v1beta1.Ingress:
 		return model.ObservableIngress
-	case *core_v1.PersistentVolume:
-		return model.ObservablePersistentVolume
+	case *core_v1.PersistentVolumeClaim:
+		return model.ObservablePersistentVolumeClaim
 	case *core_v1.Node:
 		return model.ObservableNode
 	case *core_v1.Event:
@@ -32,8 +32,8 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 		switch event.InvolvedObject.Kind {
 		case "Pod":
 			return model.ObservablePod
-		case "Deployment":
-			return model.ObservableDeployment
+		case "PersistentVolumeClaim":
+			return model.ObservablePersistentVolumeClaim
 		default:
 			panic("Unsupported event involved object kind " + event.InvolvedObject.Kind)
 		}
@@ -151,24 +151,48 @@ func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
 	return ret
 }
 
-func MakePVRecord(event watch.Event) kubeClientModel.Event {
-	pv := event.Object.(*core_v1.PersistentVolume)
-	ret := kubeClientModel.Event{
-		Time:              time.Now().Format(time.RFC3339),
-		Kind:              kubeClientModel.EventInfo,
-		ResourceName:      pv.Name,
-		ResourceUID:       string(pv.UID),
-		ResourceNamespace: pv.Namespace,
-		ResourceType:      kubeClientModel.TypeVolume,
-	}
-	switch event.Type {
-	case watch.Added:
-		ret.Name = kubeClientModel.ResourceCreated
-		ret.Time = pv.CreationTimestamp.Format(time.RFC3339)
-	case watch.Modified:
-		ret.Name = kubeClientModel.ResourceModified
-	case watch.Deleted:
-		ret.Name = kubeClientModel.ResourceDeleted
+func MakePVCRecord(event watch.Event) kubeClientModel.Event {
+	ret := kubeClientModel.Event{}
+	switch pvc := event.Object.(type) {
+	case *core_v1.PersistentVolumeClaim:
+		fmt.Println(pvc.GenerateName)
+		ret = kubeClientModel.Event{
+			Time:              time.Now().Format(time.RFC3339),
+			Kind:              kubeClientModel.EventInfo,
+			ResourceName:      pvc.Name,
+			ResourceUID:       string(pvc.UID),
+			ResourceNamespace: pvc.Namespace,
+			ResourceType:      kubeClientModel.TypeVolume,
+		}
+		switch event.Type {
+		case watch.Added:
+			ret.Name = kubeClientModel.ResourceCreated
+			ret.Time = pvc.CreationTimestamp.Format(time.RFC3339)
+		case watch.Modified:
+			ret.Name = kubeClientModel.ResourceModified
+		case watch.Deleted:
+			ret.Name = kubeClientModel.ResourceDeleted
+		}
+	case *core_v1.Event:
+		ret = kubeClientModel.Event{
+			Time:              pvc.FirstTimestamp.Time.Format(time.RFC3339),
+			ResourceName:      pvc.InvolvedObject.Name,
+			ResourceUID:       string(pvc.UID),
+			ResourceNamespace: pvc.Namespace,
+			ResourceType:      kubeClientModel.TypeVolume,
+			Message:           pvc.Message,
+			Details: map[string]string{
+				"reason": pvc.Reason,
+			},
+		}
+		switch pvc.Reason {
+		case "Failed", "BackOff":
+			ret.Kind = kubeClientModel.EventWarning
+		default:
+			ret.Kind = kubeClientModel.EventInfo
+		}
+	default:
+		panic("unknown resource type!")
 	}
 	return ret
 }

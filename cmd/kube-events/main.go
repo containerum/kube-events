@@ -30,13 +30,13 @@ var eventTransformer = transform.EventTransformer{
 		return string(ObservableTypeFromObject(event.Object))
 	},
 	Rules: map[string]transform.Func{
-		string(model.ObservableNamespace):        MakeNamespaceRecord,
-		string(model.ObservableDeployment):       MakeDeployRecord,
-		string(model.ObservablePod):              MakePodRecord,
-		string(model.ObservableService):          MakeServiceRecord,
-		string(model.ObservableIngress):          MakeIngressRecord,
-		string(model.ObservablePersistentVolume): MakePVRecord,
-		string(model.ObservableNode):             MakeNodeRecord,
+		string(model.ObservableNamespace):             MakeNamespaceRecord,
+		string(model.ObservableDeployment):            MakeDeployRecord,
+		string(model.ObservablePod):                   MakePodRecord,
+		string(model.ObservableService):               MakeServiceRecord,
+		string(model.ObservableIngress):               MakeIngressRecord,
+		string(model.ObservablePersistentVolumeClaim): MakePVCRecord,
+		string(model.ObservableNode):                  MakeNodeRecord,
 	},
 }
 
@@ -131,13 +131,13 @@ func action(ctx *cli.Context) error {
 	go deplBuffer.RunCollection(mongodb.DeploymentCollection)
 
 	//Pod events
-	defer watchers.Events.Stop()
-	eventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Events.ResultChan()))
+	defer watchers.PodEvents.Stop()
+	podEventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PodEvents.ResultChan()))
 	if err != nil {
 		return err
 	}
-	defer eventBuffer.Stop()
-	go eventBuffer.RunCollection(mongodb.EventsCollection)
+	defer podEventBuffer.Stop()
+	go podEventBuffer.RunCollection(mongodb.PodEventsCollection)
 
 	//Services
 	defer watchers.Services.Stop()
@@ -158,13 +158,22 @@ func action(ctx *cli.Context) error {
 	go ingrBuffer.RunCollection(mongodb.IngressCollection)
 
 	//Volumes
-	defer watchers.PVs.Stop()
-	pvBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVs.ResultChan()))
+	defer watchers.PVCs.Stop()
+	pvBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCs.ResultChan()))
 	if err != nil {
 		return err
 	}
 	defer pvBuffer.Stop()
-	go pvBuffer.RunCollection(mongodb.PVCollection)
+	go pvBuffer.RunCollection(mongodb.PVCCollection)
+
+	//PVC events
+	defer watchers.PVCEvents.Stop()
+	pvcEventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCEvents.ResultChan()))
+	if err != nil {
+		return err
+	}
+	defer pvcEventBuffer.Stop()
+	go pvcEventBuffer.RunCollection(mongodb.PVCEventsCollection)
 
 	pingStopChan := make(chan struct{})
 	defer close(pingStopChan)

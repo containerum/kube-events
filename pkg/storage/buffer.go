@@ -101,7 +101,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 				rb.log.Debugf("Inserting %d events", bufLen)
 				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
-					rb.log.WithError(err).Error("BulkInsert failed")
+					rb.log.WithError(err).Debug("BulkInsert failed")
 				}
 			}()
 		}

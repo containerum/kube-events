@@ -57,7 +57,7 @@ func ResourceQuotaFilter(event watch.Event) bool {
 	return true
 }
 
-func EventFilter(event watch.Event) bool {
+func PodEventsFilter(event watch.Event) bool {
 	if event.Type != watch.Added {
 		return false
 	}
@@ -75,8 +75,26 @@ func EventFilter(event watch.Event) bool {
 	}
 }
 
-func PVFilter(event watch.Event) bool {
-	pv, ok := event.Object.(*core_v1.PersistentVolume)
+func PVCEventsFilter(event watch.Event) bool {
+	if event.Type != watch.Added {
+		return false
+	}
+
+	kubeEvent, ok := event.Object.(*core_v1.Event)
+	if !ok {
+		return false
+	}
+
+	switch kubeEvent.InvolvedObject.Kind {
+	case "PersistentVolumeClaim":
+		return true
+	default:
+		return false
+	}
+}
+
+func PVCFilter(event watch.Event) bool {
+	pv, ok := event.Object.(*core_v1.PersistentVolumeClaim)
 	if !ok {
 		return false
 	}
@@ -88,7 +106,6 @@ func PVFilter(event watch.Event) bool {
 			return false
 		}
 	}
-
 	return true
 }
 

@@ -11,20 +11,22 @@ import (
 
 const (
 	ResourceQuotasCollection = "namespaces"
-	EventsCollection         = "events"
+	PodEventsCollection      = "podevents"
 	DeploymentCollection     = "deployments"
 	ServiceCollection        = "services"
 	IngressCollection        = "ingresses"
-	PVCollection             = "volumes"
+	PVCCollection            = "volumes"
+	PVCEventsCollection      = "pvcevents"
 )
 
 var collections = []string{
 	ResourceQuotasCollection,
-	EventsCollection,
+	PodEventsCollection,
 	DeploymentCollection,
 	ServiceCollection,
 	IngressCollection,
-	PVCollection,
+	PVCCollection,
+	PVCEventsCollection,
 }
 
 type Config struct {
@@ -60,7 +62,7 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 
 	if cfg.CollectionSize > 0 {
-		if err := storage.createCappedCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCappedCollectionIfNotExist(PodEventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 		if err := storage.createCappedCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
@@ -75,7 +77,10 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 		if err := storage.createCappedCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(PVCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCappedCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(PVCEventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}

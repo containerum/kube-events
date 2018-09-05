@@ -4,11 +4,11 @@ package model
 type ObservableResource string
 
 const (
-	ObservableNamespace        ObservableResource = "namespace"
-	ObservableDeployment       ObservableResource = "deployment"
-	ObservablePod              ObservableResource = "pod"
-	ObservableService          ObservableResource = "service"
-	ObservableIngress          ObservableResource = "ingress"
-	ObservablePersistentVolume ObservableResource = "pv"
-	ObservableNode             ObservableResource = "node"
+	ObservableNamespace             ObservableResource = "namespace"
+	ObservableDeployment            ObservableResource = "deployment"
+	ObservablePod                   ObservableResource = "pod"
+	ObservableService               ObservableResource = "service"
+	ObservableIngress               ObservableResource = "ingress"
+	ObservablePersistentVolumeClaim ObservableResource = "pvc"
+	ObservableNode                  ObservableResource = "node"
 )
