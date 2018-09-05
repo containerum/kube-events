@@ -95,8 +95,7 @@ func MakePodRecord(event watch.Event) kubeClientModel.Event {
 		ResourceType:      kubeClientModel.TypePod,
 		Message:           kubeEvent.Message,
 		Details: map[string]string{
-			"reason":     kubeEvent.Reason,
-			"deployment": kubeEvent.InvolvedObject.Name[:len(kubeEvent.InvolvedObject.Name)-16],
+			"reason": kubeEvent.Reason,
 		},
 	}
 	switch kubeEvent.Reason {
