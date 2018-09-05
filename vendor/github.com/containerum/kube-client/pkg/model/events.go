@@ -48,4 +48,5 @@ type Event struct {
 	ResourceUID       string            `json:"resource_uid,omitempty" yaml:"resource_uid,omitempty" bson:"resourceuid,omitempty"`
 	Message           string            `json:"message,omitempty" yaml:"message,omitempty" bson:"message,omitempty"`
 	Details           map[string]string `json:"details,omitempty" yaml:"details,omitempty" bson:"details,omitempty"`
+	DateAdded         string            `json:"-" yaml:"-" bson:"dateadded,omitempty"`
 }
