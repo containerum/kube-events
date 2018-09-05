@@ -156,7 +156,6 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 	ret := kubeClientModel.Event{}
 	switch pvc := event.Object.(type) {
 	case *core_v1.PersistentVolumeClaim:
-		fmt.Println(pvc.GenerateName)
 		ret = kubeClientModel.Event{
 			Time:              time.Now().Format(time.RFC3339),
 			Kind:              kubeClientModel.EventInfo,
