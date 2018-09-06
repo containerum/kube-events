@@ -146,6 +146,9 @@ func action(ctx *cli.Context) error {
 	defer pvcEventBuffer.Stop()
 	go pvcEventBuffer.RunCollection(mongodb.PVCEventsCollection)
 
+	cleaner := setupCleaner(ctx, mongoStorage)
+	go cleaner.RunPeriodicCleanup()
+
 	pingStopChan := make(chan struct{})
 	defer close(pingStopChan)
 	pingErrChan := make(chan error)
