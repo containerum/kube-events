@@ -58,7 +58,7 @@ func ResourceQuotaFilter(event watch.Event) bool {
 }
 
 func PodEventsFilter(event watch.Event) bool {
-	if event.Type != watch.Added {
+	if event.Type == watch.Deleted {
 		return false
 	}
 
