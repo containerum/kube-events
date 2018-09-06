@@ -63,5 +63,4 @@ func (rc *RecordCleaner) Stop() {
 	rc.log.Debug("Stop periodic cleanup")
 	rc.stop <- struct{}{}
 	rc.cleanupTimer.Stop()
-	return
 }

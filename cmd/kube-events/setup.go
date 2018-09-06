@@ -179,20 +179,20 @@ func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
 	})
 }
 
-func setupBuffer(ctx *cli.Context, inserter storage.EventBulkInserter, collector <-chan kubeClientModel.Event) (*storage.RecordBuffer, error) {
+func setupBuffer(ctx *cli.Context, inserter storage.EventBulkInserter, collector <-chan kubeClientModel.Event) *storage.RecordBuffer {
 	return storage.NewRecordBuffer(storage.RecordBufferConfig{
 		Storage:         inserter,
 		BufferCap:       ctx.Int(bufferCapacityFlag.Name),
 		InsertPeriod:    ctx.Duration(bufferFlushPeriodFlag.Name),
 		MinInsertEvents: ctx.Int(bufferMinInsertEventsFlag.Name),
 		Collector:       collector,
-	}), nil
+	})
 }
 
-func setupCleaner(ctx *cli.Context, cleaner storage.EventCleaner) (*storage.RecordCleaner, error) {
+func setupCleaner(ctx *cli.Context, cleaner storage.EventCleaner) *storage.RecordCleaner {
 	return storage.NewRecordCleaner(storage.RecordCleanerConfig{
 		Storage:          cleaner,
 		CleanupRunPeriod: ctx.Duration(cleanupIntervalFlag.Name),
 		RetentionPeriod:  ctx.Duration(retentionPeriodFlag.Name),
-	}), nil
+	})
 }
