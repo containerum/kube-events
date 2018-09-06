@@ -28,7 +28,7 @@ type Watchers struct {
 	PVCEvents      watch.Interface
 }
 
-func (k *Kube) WatchSupportedResources() (Watchers, error) {
+func (k *Kube) WatchSupportedResources() Watchers {
 	informerFactory := informers.NewSharedInformerFactory(k.Clientset, 0)
 
 	rqWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().ResourceQuotas().Informer())
@@ -55,5 +55,5 @@ func (k *Kube) WatchSupportedResources() (Watchers, error) {
 		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
 		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter, ErrorFilter),
 		PVCEvents:      transform.NewFilteredWatch(eventWatch, PVCEventsFilter, ErrorFilter),
-	}, nil
+	}
 }

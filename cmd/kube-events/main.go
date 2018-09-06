@@ -17,13 +17,8 @@ import (
 	"github.com/containerum/kube-events/pkg/transform"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 )
-
-var defaultListOptions = meta_v1.ListOptions{
-	Watch: true,
-}
 
 var eventTransformer = transform.EventTransformer{
 	RuleSelector: func(event watch.Event) string {
@@ -58,15 +53,15 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 		},
 		Timeout: client.config.Timeout,
 	}
-	reqUrl, err := url.Parse(client.config.Host)
+	reqURL, err := url.Parse(client.config.Host)
 	if err != nil {
 		errChan <- err
 		return
 	}
-	reqUrl.Path = "/healthz"
+	reqURL.Path = "/healthz"
 	req := http.Request{
 		Method: http.MethodGet,
-		URL:    reqUrl,
+		URL:    reqURL,
 	}
 	defer ticker.Stop()
 	for {
@@ -101,10 +96,7 @@ func action(ctx *cli.Context) error {
 		return err
 	}
 
-	watchers, err := kubeClient.WatchSupportedResources()
-	if err != nil {
-		return err
-	}
+	watchers := kubeClient.WatchSupportedResources()
 
 	mongoStorage, err := setupMongo(ctx)
 	if err != nil {
@@ -114,64 +106,43 @@ func action(ctx *cli.Context) error {
 
 	//Namespaces
 	defer watchers.ResourceQuotas.Stop()
-	nsBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.ResourceQuotas.ResultChan()))
-	if err != nil {
-		return err
-	}
+	nsBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.ResourceQuotas.ResultChan()))
 	defer nsBuffer.Stop()
 	go nsBuffer.RunCollection(mongodb.ResourceQuotasCollection)
 
 	//Deployments
 	defer watchers.Deployments.Stop()
-	deplBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Deployments.ResultChan()))
-	if err != nil {
-		return err
-	}
+	deplBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Deployments.ResultChan()))
 	defer deplBuffer.Stop()
 	go deplBuffer.RunCollection(mongodb.DeploymentCollection)
 
 	//Pod events
 	defer watchers.PodEvents.Stop()
-	podEventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PodEvents.ResultChan()))
-	if err != nil {
-		return err
-	}
+	podEventBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PodEvents.ResultChan()))
 	defer podEventBuffer.Stop()
 	go podEventBuffer.RunCollection(mongodb.PodEventsCollection)
 
 	//Services
 	defer watchers.Services.Stop()
-	svcBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Services.ResultChan()))
-	if err != nil {
-		return err
-	}
+	svcBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Services.ResultChan()))
 	defer svcBuffer.Stop()
 	go svcBuffer.RunCollection(mongodb.ServiceCollection)
 
 	//Ingresses
 	defer watchers.Ingresses.Stop()
-	ingrBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Ingresses.ResultChan()))
-	if err != nil {
-		return err
-	}
+	ingrBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Ingresses.ResultChan()))
 	defer ingrBuffer.Stop()
 	go ingrBuffer.RunCollection(mongodb.IngressCollection)
 
 	//Volumes
 	defer watchers.PVCs.Stop()
-	pvBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCs.ResultChan()))
-	if err != nil {
-		return err
-	}
+	pvBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCs.ResultChan()))
 	defer pvBuffer.Stop()
 	go pvBuffer.RunCollection(mongodb.PVCCollection)
 
 	//PVC events
 	defer watchers.PVCEvents.Stop()
-	pvcEventBuffer, err := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCEvents.ResultChan()))
-	if err != nil {
-		return err
-	}
+	pvcEventBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCEvents.ResultChan()))
 	defer pvcEventBuffer.Stop()
 	go pvcEventBuffer.RunCollection(mongodb.PVCEventsCollection)
 
@@ -180,7 +151,7 @@ func action(ctx *cli.Context) error {
 	pingErrChan := make(chan error)
 	go pingKube(kubeClient, 5*time.Second, pingErrChan, pingStopChan)
 
-	sigch := make(chan os.Signal)
+	sigch := make(chan os.Signal, 1)
 	signal.Notify(sigch, os.Kill, os.Interrupt)
 	select {
 	case <-sigch:
