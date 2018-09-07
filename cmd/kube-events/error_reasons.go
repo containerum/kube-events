@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"k8s.io/kubernetes/pkg/kubelet/events"
 )
 
@@ -40,6 +38,5 @@ var errorReasons = errorSet{events.FailedToCreateContainer: nil,
 
 func (errs errorSet) isErrorReason(reason string) bool {
 	_, isErr := errs[reason]
-	fmt.Println("Reason", reason, isErr)
 	return isErr
 }
