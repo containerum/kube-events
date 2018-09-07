@@ -103,12 +103,12 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		ret.ResourceType = kubeClientModel.TypeVolume
 	}
 
-	switch kubeEvent.Reason {
-	case "Failed", "BackOff":
+	if errorReasons.isErrorReason(kubeEvent.Reason) {
 		ret.Kind = kubeClientModel.EventWarning
-	default:
+	} else {
 		ret.Kind = kubeClientModel.EventInfo
 	}
+
 	return ret
 }
 
