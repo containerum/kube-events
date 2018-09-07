@@ -50,7 +50,7 @@ func (s *Storage) ensureIndexes() error {
 	}
 
 	{
-		collection := s.db.C(PodEventsCollection)
+		collection := s.db.C(EventsCollection)
 		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -118,22 +118,6 @@ func (s *Storage) ensureIndexes() error {
 	{
 		collection := s.db.C(PVCCollection)
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndexKey("eventname"); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndexKey("resourcename"); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(PVCEventsCollection)
-		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {

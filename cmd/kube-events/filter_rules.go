@@ -57,25 +57,7 @@ func ResourceQuotaFilter(event watch.Event) bool {
 	return true
 }
 
-func PodEventsFilter(event watch.Event) bool {
-	if event.Type == watch.Deleted {
-		return false
-	}
-
-	kubeEvent, ok := event.Object.(*core_v1.Event)
-	if !ok {
-		return false
-	}
-
-	switch kubeEvent.InvolvedObject.Kind {
-	case "Pod":
-		return true
-	default:
-		return false
-	}
-}
-
-func PVCEventsFilter(event watch.Event) bool {
+func EventsFilter(event watch.Event) bool {
 	if event.Type != watch.Added {
 		return false
 	}
@@ -86,7 +68,7 @@ func PVCEventsFilter(event watch.Event) bool {
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
-	case "PersistentVolumeClaim":
+	case "Pod", "PersistentVolumeClaim":
 		return true
 	default:
 		return false
