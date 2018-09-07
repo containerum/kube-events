@@ -20,7 +20,11 @@ spec:
         release: {{ .Release.Name }}
     spec:
       {{- if .Values.rbac.serviceAccountName }}
+        {{- if ne .Values.rbac.serviceAccountName "release-name" }}
       serviceAccountName: {{ .Values.rbac.serviceAccountName }}
+        {{- else }}
+      serviceAccountName: {{ .Release.Name }}
+        {{- end }}
       {{- else }}
       serviceAccountName: {{ .Release.Name }}
       {{- end }}
