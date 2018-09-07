@@ -95,7 +95,6 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-
 	}
 
 	{
@@ -112,7 +111,6 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-
 	}
 
 	{
@@ -120,6 +118,32 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+	}
+
+	{
+		collection := s.db.C(UserCollection)
+		if err := collection.EnsureIndexKey("eventname"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
+			errs = append(errs, err.Error())
+		}
+	}
+
+	{
+		collection := s.db.C(SystemCollection)
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}

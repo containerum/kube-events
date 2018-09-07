@@ -16,6 +16,8 @@ const (
 	ServiceCollection        = "services"
 	IngressCollection        = "ingresses"
 	PVCCollection            = "volumes"
+	UserCollection           = "user"
+	SystemCollection         = "system"
 )
 
 var collections = []string{
@@ -25,6 +27,8 @@ var collections = []string{
 	IngressCollection,
 	PVCCollection,
 	EventsCollection,
+	UserCollection,
+	SystemCollection,
 }
 
 type Config struct {
@@ -76,6 +80,12 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 			return nil, err
 		}
 		if err := storage.createCappedCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(UserCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCappedCollectionIfNotExist(SystemCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}
