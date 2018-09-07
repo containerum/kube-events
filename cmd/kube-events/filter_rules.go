@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 
 	"k8s.io/api/apps/v1"
@@ -70,7 +69,6 @@ func EventsFilter(event watch.Event) bool {
 
 	switch kubeEvent.InvolvedObject.Kind {
 	case "Pod", "PersistentVolumeClaim":
-		fmt.Println("EVENT!!!!")
 		return true
 	default:
 		return false
