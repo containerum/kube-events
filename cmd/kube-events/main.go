@@ -27,7 +27,7 @@ var eventTransformer = transform.EventTransformer{
 	Rules: map[string]transform.Func{
 		string(model.ObservableNamespace):             MakeNamespaceRecord,
 		string(model.ObservableDeployment):            MakeDeployRecord,
-		string(model.ObservablePod):                   MakePodRecord,
+		string(model.ObservableEvent):                 MakeEventRecord,
 		string(model.ObservableService):               MakeServiceRecord,
 		string(model.ObservableIngress):               MakeIngressRecord,
 		string(model.ObservablePersistentVolumeClaim): MakePVCRecord,
@@ -116,12 +116,6 @@ func action(ctx *cli.Context) error {
 	defer deplBuffer.Stop()
 	go deplBuffer.RunCollection(mongodb.DeploymentCollection)
 
-	//Pod events
-	defer watchers.PodEvents.Stop()
-	podEventBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PodEvents.ResultChan()))
-	defer podEventBuffer.Stop()
-	go podEventBuffer.RunCollection(mongodb.PodEventsCollection)
-
 	//Services
 	defer watchers.Services.Stop()
 	svcBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Services.ResultChan()))
@@ -140,11 +134,11 @@ func action(ctx *cli.Context) error {
 	defer pvBuffer.Stop()
 	go pvBuffer.RunCollection(mongodb.PVCCollection)
 
-	//PVC events
-	defer watchers.PVCEvents.Stop()
-	pvcEventBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCEvents.ResultChan()))
-	defer pvcEventBuffer.Stop()
-	go pvcEventBuffer.RunCollection(mongodb.PVCEventsCollection)
+	//Events
+	defer watchers.Events.Stop()
+	eventBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Events.ResultChan()))
+	defer eventBuffer.Stop()
+	go eventBuffer.RunCollection(mongodb.EventsCollection)
 
 	cleaner := setupCleaner(ctx, mongoStorage)
 	go cleaner.RunPeriodicCleanup()

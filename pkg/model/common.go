@@ -6,7 +6,7 @@ type ObservableResource string
 const (
 	ObservableNamespace             ObservableResource = "namespace"
 	ObservableDeployment            ObservableResource = "deployment"
-	ObservablePod                   ObservableResource = "pod"
+	ObservableEvent                 ObservableResource = "event"
 	ObservableService               ObservableResource = "service"
 	ObservableIngress               ObservableResource = "ingress"
 	ObservablePersistentVolumeClaim ObservableResource = "pvc"

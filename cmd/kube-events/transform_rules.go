@@ -30,10 +30,8 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	case *core_v1.Event:
 		event := object.(*core_v1.Event)
 		switch event.InvolvedObject.Kind {
-		case "Pod":
-			return model.ObservablePod
-		case "PersistentVolumeClaim":
-			return model.ObservablePersistentVolumeClaim
+		case "Pod", "PersistentVolumeClaim":
+			return model.ObservableEvent
 		default:
 			panic("Unsupported event involved object kind " + event.InvolvedObject.Kind)
 		}
@@ -85,19 +83,26 @@ func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
 	return ret
 }
 
-func MakePodRecord(event watch.Event) kubeClientModel.Event {
+func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 	kubeEvent := event.Object.(*core_v1.Event)
 	ret := kubeClientModel.Event{
 		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
 		ResourceName:      kubeEvent.InvolvedObject.Name,
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
-		ResourceType:      kubeClientModel.TypePod,
 		Message:           kubeEvent.Message,
 		Details: map[string]string{
 			"reason": kubeEvent.Reason,
 		},
 	}
+
+	switch kubeEvent.InvolvedObject.Kind {
+	case "Pod":
+		ret.ResourceType = kubeClientModel.TypePod
+	case "PersistentVolumeClaim":
+		ret.ResourceType = kubeClientModel.TypeVolume
+	}
+
 	switch kubeEvent.Reason {
 	case "Failed", "BackOff":
 		ret.Kind = kubeClientModel.EventWarning
@@ -171,24 +176,6 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 			ret.Name = kubeClientModel.ResourceModified
 		case watch.Deleted:
 			ret.Name = kubeClientModel.ResourceDeleted
-		}
-	case *core_v1.Event:
-		ret = kubeClientModel.Event{
-			Time:              pvc.FirstTimestamp.Time.Format(time.RFC3339),
-			ResourceName:      pvc.InvolvedObject.Name,
-			ResourceUID:       string(pvc.UID),
-			ResourceNamespace: pvc.Namespace,
-			ResourceType:      kubeClientModel.TypeVolume,
-			Message:           pvc.Message,
-			Details: map[string]string{
-				"reason": pvc.Reason,
-			},
-		}
-		switch pvc.Reason {
-		case "Failed", "BackOff":
-			ret.Kind = kubeClientModel.EventWarning
-		default:
-			ret.Kind = kubeClientModel.EventInfo
 		}
 	default:
 		panic("unknown resource type!")

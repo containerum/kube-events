@@ -21,11 +21,10 @@ type Kube struct {
 type Watchers struct {
 	ResourceQuotas watch.Interface //Namespaces
 	Deployments    watch.Interface
-	PodEvents      watch.Interface //Pods
+	Events         watch.Interface //Pods
 	Services       watch.Interface
 	Ingresses      watch.Interface
 	PVCs           watch.Interface //Volumes
-	PVCEvents      watch.Interface
 }
 
 func (k *Kube) WatchSupportedResources() Watchers {
@@ -50,10 +49,9 @@ func (k *Kube) WatchSupportedResources() Watchers {
 	return Watchers{
 		ResourceQuotas: transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter, ErrorFilter),
 		Deployments:    transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter, ErrorFilter),
-		PodEvents:      transform.NewFilteredWatch(eventWatch, PodEventsFilter, ErrorFilter),
+		Events:         transform.NewFilteredWatch(eventWatch, EventsFilter, ErrorFilter),
 		Services:       transform.NewFilteredWatch(serviceWatch, ErrorFilter),
 		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
 		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter, ErrorFilter),
-		PVCEvents:      transform.NewFilteredWatch(eventWatch, PVCEventsFilter, ErrorFilter),
 	}
 }
