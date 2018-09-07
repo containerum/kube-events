@@ -108,7 +108,6 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 	} else {
 		ret.Kind = kubeClientModel.EventInfo
 	}
-
 	return ret
 }
 
