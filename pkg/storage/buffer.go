@@ -9,11 +9,11 @@ import (
 )
 
 type EventInserter interface {
-	Insert(r *model.Record) error
+	Insert(r *model.Record, collection string) error
 }
 
 type EventBulkInserter interface {
-	BulkInsert(r []model.Record) error
+	BulkInsert(r []model.Record, collection string) error
 }
 
 type RecordBufferConfig struct {
@@ -58,22 +58,25 @@ func NewRecordBuffer(cfg RecordBufferConfig) *RecordBuffer {
 func (rb *RecordBuffer) readRecords() {
 	for {
 		select {
-		case record := <-rb.cfg.Collector:
+		case record, ok := <-rb.cfg.Collector:
+			if !ok {
+				return
+			}
 			rb.log.Debugf("Collected record %+v", record)
 			rb.bufferMu.Lock()
 			rb.buffer = append(rb.buffer, record)
 			rb.bufferMu.Unlock()
 		case <-rb.readStop:
-			break
+			return
 		}
 	}
 }
 
-func (rb *RecordBuffer) insertRecords() {
+func (rb *RecordBuffer) insertRecords(collection string) {
 	for {
 		select {
 		case <-rb.insertStop:
-			break
+			return
 		case <-rb.insertTimer.C:
 			// get a buffer length and copy slice pointer (it may be replaced in RecordBuffer)
 			rb.bufferMu.Lock()
@@ -82,20 +85,21 @@ func (rb *RecordBuffer) insertRecords() {
 			rb.bufferMu.Unlock()
 
 			if bufLen < rb.cfg.MinInsertEvents {
-				rb.log.Infof("Wanted minimum %d records to be inserted, collected %d",
+				rb.log.Debugf("Wanted minimum %d records to be inserted, collected %d",
 					rb.cfg.MinInsertEvents, bufLen)
 				continue
 			}
 
 			// replace a buffer with empty one
+			newBuf := make([]model.Record, 0, rb.cfg.BufferCap)
 			rb.bufferMu.Lock()
-			rb.buffer = make([]model.Record, 0, rb.cfg.BufferCap)
+			rb.buffer = newBuf
 			rb.bufferMu.Unlock()
 
 			// perform bulk insert
 			go func() {
-				rb.log.Infof("Inserting %d events", bufLen)
-				err := rb.cfg.Storage.BulkInsert(oldBuf)
+				rb.log.Debugf("Inserting %d events", bufLen)
+				err := rb.cfg.Storage.BulkInsert(oldBuf, collection)
 				if err != nil {
 					rb.log.WithError(err).Error("BulkInsert failed")
 				}
@@ -104,10 +108,10 @@ func (rb *RecordBuffer) insertRecords() {
 	}
 }
 
-func (rb *RecordBuffer) RunCollection() {
+func (rb *RecordBuffer) RunCollection(collection string) {
 	rb.log.Debug("Starting reading/inserting records")
 	go rb.readRecords()
-	go rb.insertRecords()
+	go rb.insertRecords(collection)
 }
 
 func (rb *RecordBuffer) Stop() {

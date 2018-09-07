@@ -3,6 +3,8 @@ package main
 import (
 	"sync"
 
+	"k8s.io/api/apps/v1"
+
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
@@ -13,23 +15,34 @@ type DeployFilter struct {
 	generationMap map[types.UID]int64
 }
 
+func NewDeployFilter() *DeployFilter {
+	return &DeployFilter{
+		generationMap: make(map[types.UID]int64),
+	}
+}
+
 func (df *DeployFilter) compareAndSwapGeneration(uid types.UID, newGeneration int64) bool {
 	df.generationMu.Lock()
 	defer df.generationMu.Unlock()
 
 	if df.generationMap[uid] < newGeneration {
 		df.generationMap[uid] = newGeneration
-		return true
+		if newGeneration > 1 {
+			return true
+		}
 	}
 	return false
 }
 
 func (df *DeployFilter) Filter(event watch.Event) bool {
-	deploy, ok := event.Object.(*core_v1.Event)
+	deploy, ok := event.Object.(*v1.Deployment)
 	if !ok {
 		return false
 	}
-	return df.compareAndSwapGeneration(deploy.UID, deploy.Generation)
+	if event.Type == watch.Modified {
+		return df.compareAndSwapGeneration(deploy.UID, deploy.Generation)
+	}
+	return true
 }
 
 func ResourceQuotaFilter(event watch.Event) bool {
@@ -45,13 +58,17 @@ func ResourceQuotaFilter(event watch.Event) bool {
 }
 
 func EventFilter(event watch.Event) bool {
+	if event.Type != watch.Added {
+		return false
+	}
+
 	kubeEvent, ok := event.Object.(*core_v1.Event)
 	if !ok {
 		return false
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
-	case "Pod", "Deployment":
+	case "Pod":
 		return true
 	default:
 		return false
@@ -73,4 +90,8 @@ func PVFilter(event watch.Event) bool {
 	}
 
 	return true
+}
+
+func ErrorFilter(event watch.Event) bool {
+	return event.Type != watch.Error
 }

@@ -2,6 +2,7 @@ package transform
 
 import (
 	"github.com/containerum/kube-events/pkg/model"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -18,8 +19,10 @@ func (et *EventTransformer) Output(input <-chan watch.Event) <-chan model.Record
 	outCh := make(chan model.Record)
 	go func() {
 		for event := range input {
-			f, ok := et.Rules[et.RuleSelector(event)]
+			ruleSelector := et.RuleSelector(event)
+			f, ok := et.Rules[ruleSelector]
 			if !ok {
+				logrus.Warn("Unsupported RuleSelector: %v", ruleSelector)
 				continue
 			}
 			outCh <- f(event)
