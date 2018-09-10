@@ -34,20 +34,6 @@ var (
 		Usage:   "Print logs in text mode instead of json.",
 	}
 
-	retentionPeriodFlag = cli.DurationFlag{
-		Name:    "retention-period",
-		EnvVars: []string{"RETENTION_PERIOD"},
-		Usage:   "Period of keeping log records in storage. Earlier records will be deleted.",
-		Value:   24 * time.Hour,
-	}
-
-	cleanupIntervalFlag = cli.DurationFlag{
-		Name:    "cleanup-period",
-		EnvVars: []string{"CLEANUP_PERIOD"},
-		Usage:   "Period of running cleanup procedure.",
-		Value:   12 * time.Hour,
-	}
-
 	mongoAddressFlag = cli.StringSliceFlag{
 		Name:    "mongo-address",
 		EnvVars: []string{"MONGO_ADDRS"},
@@ -186,13 +172,5 @@ func setupBuffer(ctx *cli.Context, inserter storage.EventBulkInserter, collector
 		InsertPeriod:    ctx.Duration(bufferFlushPeriodFlag.Name),
 		MinInsertEvents: ctx.Int(bufferMinInsertEventsFlag.Name),
 		Collector:       collector,
-	})
-}
-
-func setupCleaner(ctx *cli.Context, cleaner storage.EventCleaner) *storage.RecordCleaner {
-	return storage.NewRecordCleaner(storage.RecordCleanerConfig{
-		Storage:          cleaner,
-		CleanupRunPeriod: ctx.Duration(cleanupIntervalFlag.Name),
-		RetentionPeriod:  ctx.Duration(retentionPeriodFlag.Name),
 	})
 }
