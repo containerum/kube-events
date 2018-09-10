@@ -99,7 +99,7 @@ func (rb *RecordBuffer) insertRecords(collection string) {
 			// perform bulk insert
 			go func() {
 				rb.log.Debugf("Inserting %d events", bufLen)
-				dateAdded := time.Now().Format(time.RFC3339)
+				dateAdded := time.Now()
 				for i := range oldBuf {
 					oldBuf[i].DateAdded = dateAdded
 				}

@@ -3,6 +3,7 @@ package mongodb
 import (
 	"errors"
 	"strings"
+	"time"
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 
@@ -27,6 +28,12 @@ var (
 		DropDups: true,
 		Unique:   true,
 	}
+
+	dateExpirationIndex = mgo.Index{
+		Name:        "date_expiration",
+		Key:         []string{"dateadded"},
+		ExpireAfter: 30 * 24 * time.Hour,
+	}
 )
 
 func (s *Storage) ensureIndexes() error {
@@ -36,6 +43,9 @@ func (s *Storage) ensureIndexes() error {
 	{
 		collection := s.db.C(DeploymentCollection)
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
@@ -54,6 +64,9 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -68,6 +81,9 @@ func (s *Storage) ensureIndexes() error {
 	{
 		collection := s.db.C(ResourceQuotasCollection)
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
@@ -86,6 +102,9 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -100,6 +119,9 @@ func (s *Storage) ensureIndexes() error {
 	{
 		collection := s.db.C(ServiceCollection)
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
@@ -118,6 +140,9 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(addedDeletedIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -134,6 +159,9 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
 			errs = append(errs, err.Error())
 		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
+			errs = append(errs, err.Error())
+		}
 		if err := collection.EnsureIndexKey("resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -145,6 +173,9 @@ func (s *Storage) ensureIndexes() error {
 	{
 		collection := s.db.C(SystemCollection)
 		if err := collection.EnsureIndexKey("eventname"); err != nil {
+			errs = append(errs, err.Error())
+		}
+		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
 		if err := collection.EnsureIndexKey("resourcename"); err != nil {

@@ -4,7 +4,7 @@ require (
 	github.com/PuerkitoBio/purell v1.1.0 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/containerum/kube-client v0.23.30
+	github.com/containerum/kube-client v0.23.31
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.6.2+incompatible // indirect
 	github.com/emicklei/go-restful v2.8.0+incompatible // indirect
