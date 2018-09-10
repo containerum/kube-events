@@ -140,9 +140,6 @@ func action(ctx *cli.Context) error {
 	defer eventBuffer.Stop()
 	go eventBuffer.RunCollection(mongodb.EventsCollection)
 
-	cleaner := setupCleaner(ctx, mongoStorage)
-	go cleaner.RunPeriodicCleanup()
-
 	pingStopChan := make(chan struct{})
 	defer close(pingStopChan)
 	pingErrChan := make(chan error)
@@ -169,8 +166,6 @@ func main() {
 			&configFlag,
 			&debugFlag,
 			&textlogFlag,
-			&retentionPeriodFlag,
-			&cleanupIntervalFlag,
 			&mongoAddressFlag,
 			&mongoUserFlag,
 			&mongoPasswordFlag,

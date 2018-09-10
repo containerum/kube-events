@@ -1,11 +1,8 @@
 package mongodb
 
 import (
-	"time"
-
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,17 +16,6 @@ const (
 	UserCollection           = "user"
 	SystemCollection         = "system"
 )
-
-var collections = []string{
-	ResourceQuotasCollection,
-	DeploymentCollection,
-	ServiceCollection,
-	IngressCollection,
-	PVCCollection,
-	EventsCollection,
-	UserCollection,
-	SystemCollection,
-}
 
 type Config struct {
 	mgo.DialInfo
@@ -119,25 +105,6 @@ func (s *Storage) BulkInsert(r []kubeClientModel.Event, collection string) error
 		"matched":  result.Matched,
 		"modified": result.Modified,
 	}).Debug("Bulk insert run")
-	return nil
-}
-
-func (s *Storage) Cleanup(deleteBefore time.Time) error {
-	s.log.WithField("delete_before", deleteBefore).Debugf("Cleanup")
-	for _, col := range collections {
-		bulk := s.db.C(col).Bulk()
-		bulk.Unordered()
-		bulk.RemoveAll(bson.M{"timestamp": bson.M{"$lte": deleteBefore}})
-		result, err := bulk.Run()
-		if err != nil {
-			return err
-		}
-		s.log.WithFields(logrus.Fields{
-			"matched":    result.Matched,
-			"modified":   result.Modified,
-			"collection": col,
-		}).Debug("Cleanup run")
-	}
 	return nil
 }
 
