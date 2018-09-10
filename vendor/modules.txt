@@ -4,7 +4,7 @@ github.com/PuerkitoBio/purell
 github.com/PuerkitoBio/urlesc
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/containerum/kube-client v0.23.30
+# github.com/containerum/kube-client v0.23.31
 github.com/containerum/kube-client/pkg/model
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew

@@ -6,6 +6,8 @@ github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdn
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/containerum/kube-client v0.23.30 h1:Ht3cCU4Myo7vSCGj0sdjBEiNssbyiCHPfhPQdbOrVik=
 github.com/containerum/kube-client v0.23.30/go.mod h1:61P8/wJ8DxbKRdll4AyWfBv3FWqsq7Fn5ny1YLY72OU=
+github.com/containerum/kube-client v0.23.31 h1:w46FpLTBjFnYiFg6Sdq+UoSd+O1CrwxcfZukrrULV5I=
+github.com/containerum/kube-client v0.23.31/go.mod h1:61P8/wJ8DxbKRdll4AyWfBv3FWqsq7Fn5ny1YLY72OU=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/docker/distribution v2.6.2+incompatible h1:4FI6af79dfCS/CYb+RRtkSHw3q1L/bnDjG1PcPZtQhM=

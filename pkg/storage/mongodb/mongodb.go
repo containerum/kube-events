@@ -50,28 +50,28 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 	}
 
 	if cfg.CollectionSize > 0 {
-		if err := storage.createCappedCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(ResourceQuotasCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(ResourceQuotasCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(ServiceCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(ServiceCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(UserCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(UserCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
-		if err := storage.createCappedCollectionIfNotExist(SystemCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+		if err := storage.createCollectionIfNotExist(SystemCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}
