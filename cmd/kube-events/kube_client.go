@@ -24,6 +24,8 @@ type Watchers struct {
 	Events         watch.Interface //Pods
 	Services       watch.Interface
 	Ingresses      watch.Interface
+	Secrets        watch.Interface
+	ConfigMaps     watch.Interface
 	PVCs           watch.Interface //Volumes
 }
 
@@ -36,6 +38,8 @@ func (k *Kube) WatchSupportedResources() Watchers {
 	serviceWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Services().Informer())
 	ingressWatch := informerwatch.NewInformerWatch(informerFactory.Extensions().V1beta1().Ingresses().Informer())
 	pvcWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().PersistentVolumeClaims().Informer())
+	secretWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Secrets().Informer())
+	cmWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().ConfigMaps().Informer())
 
 	logrus.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
@@ -43,7 +47,9 @@ func (k *Kube) WatchSupportedResources() Watchers {
 		"Event",
 		"Service",
 		"Ingress",
-		"PersistentVolume",
+		"PersistentVolumeClaim",
+		"Secret",
+		"ConfigMap",
 	}, ","))
 
 	return Watchers{
@@ -53,5 +59,7 @@ func (k *Kube) WatchSupportedResources() Watchers {
 		Services:       transform.NewFilteredWatch(serviceWatch, ErrorFilter),
 		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
 		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter, ErrorFilter),
+		Secrets:        transform.NewFilteredWatch(secretWatch, ErrorFilter),
+		ConfigMaps:     transform.NewFilteredWatch(cmWatch, ErrorFilter),
 	}
 }

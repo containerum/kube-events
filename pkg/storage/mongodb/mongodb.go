@@ -13,9 +13,24 @@ const (
 	ServiceCollection        = "services"
 	IngressCollection        = "ingresses"
 	PVCCollection            = "volumes"
+	SecretsCollection        = "secrets"
+	ConfigMapsCollection     = "configmaps"
 	UserCollection           = "user"
 	SystemCollection         = "system"
 )
+
+var Сollections = []string{
+	ResourceQuotasCollection,
+	EventsCollection,
+	DeploymentCollection,
+	ServiceCollection,
+	IngressCollection,
+	PVCCollection,
+	SecretsCollection,
+	ConfigMapsCollection,
+	UserCollection,
+	SystemCollection,
+}
 
 type Config struct {
 	mgo.DialInfo
@@ -66,6 +81,12 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 			return nil, err
 		}
 		if err := storage.createCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCollectionIfNotExist(SecretsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCollectionIfNotExist(ConfigMapsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 		if err := storage.createCollectionIfNotExist(UserCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
