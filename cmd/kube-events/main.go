@@ -130,9 +130,21 @@ func action(ctx *cli.Context) error {
 
 	//Volumes
 	defer watchers.PVCs.Stop()
-	pvBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCs.ResultChan()))
-	defer pvBuffer.Stop()
-	go pvBuffer.RunCollection(mongodb.PVCCollection)
+	pvcBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.PVCs.ResultChan()))
+	defer pvcBuffer.Stop()
+	go pvcBuffer.RunCollection(mongodb.PVCCollection)
+
+	//Secrets
+	defer watchers.PVCs.Stop()
+	secretBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.Secrets.ResultChan()))
+	defer secretBuffer.Stop()
+	go secretBuffer.RunCollection(mongodb.SecretsCollection)
+
+	//ConfigMaps
+	defer watchers.PVCs.Stop()
+	cmBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.ConfigMaps.ResultChan()))
+	defer cmBuffer.Stop()
+	go cmBuffer.RunCollection(mongodb.ConfigMapsCollection)
 
 	//Events
 	defer watchers.Events.Stop()
@@ -146,7 +158,7 @@ func action(ctx *cli.Context) error {
 	go pingKube(kubeClient, 5*time.Second, pingErrChan, pingStopChan)
 
 	sigch := make(chan os.Signal, 1)
-	signal.Notify(sigch, os.Kill, os.Interrupt)
+	signal.Notify(sigch, os.Interrupt)
 	select {
 	case <-sigch:
 		return nil
