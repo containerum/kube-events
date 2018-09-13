@@ -32,6 +32,8 @@ var eventTransformer = transform.EventTransformer{
 		string(model.ObservableIngress):               MakeIngressRecord,
 		string(model.ObservablePersistentVolumeClaim): MakePVCRecord,
 		string(model.ObservableNode):                  MakeNodeRecord,
+		string(model.ObservableSecret):                MakeSecretRecord,
+		string(model.ObservableConfigMap):             MakeConfigMapRecord,
 	},
 }
 
