@@ -54,60 +54,15 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
 			errs = append(errs, err.Error())
 		}
-	}
-
-	{
-		collection := s.db.C(DeploymentCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(EventsCollection)
-		if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-	{
-		collection := s.db.C(ResourceQuotasCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(IngressCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(ServiceCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(PVCCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(SecretsCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	{
-		collection := s.db.C(ConfigMapsCollection)
-		if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
-			errs = append(errs, err.Error())
+		switch collectionName {
+		case DeploymentCollection, ResourceQuotasCollection, IngressCollection, ServiceCollection, PVCCollection, SecretsCollection, ConfigMapsCollection:
+			if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
+				errs = append(errs, err.Error())
+			}
+		case EventsCollection:
+			if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
+				errs = append(errs, err.Error())
+			}
 		}
 	}
 

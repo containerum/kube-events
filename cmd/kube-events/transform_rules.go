@@ -25,6 +25,10 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 		return model.ObservableIngress
 	case *core_v1.PersistentVolumeClaim:
 		return model.ObservablePersistentVolumeClaim
+	case *core_v1.Secret:
+		return model.ObservableSecret
+	case *core_v1.ConfigMap:
+		return model.ObservableConfigMap
 	case *core_v1.Node:
 		return model.ObservableNode
 	case *core_v1.Event:
@@ -178,6 +182,50 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 		}
 	default:
 		panic("unknown resource type!")
+	}
+	return ret
+}
+
+func MakeSecretRecord(event watch.Event) kubeClientModel.Event {
+	sct := event.Object.(*core_v1.Secret)
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      sct.Name,
+		ResourceUID:       string(sct.UID),
+		ResourceNamespace: sct.Namespace,
+		ResourceType:      kubeClientModel.TypeSecret,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = sct.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
+	}
+	return ret
+}
+
+func MakeConfigMapRecord(event watch.Event) kubeClientModel.Event {
+	cm := event.Object.(*core_v1.ConfigMap)
+	ret := kubeClientModel.Event{
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      cm.Name,
+		ResourceUID:       string(cm.UID),
+		ResourceNamespace: cm.Namespace,
+		ResourceType:      kubeClientModel.TypeConfigMap,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+		ret.Time = cm.CreationTimestamp.Format(time.RFC3339)
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
 	}
 	return ret
 }
