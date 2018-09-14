@@ -19,7 +19,7 @@ const (
 	SystemCollection         = "system"
 )
 
-var Сollections = []string{
+var Collections = []string{
 	ResourceQuotasCollection,
 	EventsCollection,
 	DeploymentCollection,

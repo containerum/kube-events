@@ -40,7 +40,7 @@ func (s *Storage) ensureIndexes() error {
 	s.log.Debugf("Ensure indexes")
 	var errs []string
 
-	for _, collectionName := range Сollections {
+	for _, collectionName := range Collections {
 		collection := s.db.C(collectionName)
 		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
