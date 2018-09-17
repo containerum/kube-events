@@ -78,8 +78,11 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 				continue
 			}
 			body, err := ioutil.ReadAll(resp.Body)
-			resp.Body.Close()
 			if err != nil {
+				errChan <- err
+				continue
+			}
+			if err := resp.Body.Close(); err != nil {
 				errChan <- err
 				continue
 			}

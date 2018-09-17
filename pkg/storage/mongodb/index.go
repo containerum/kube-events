@@ -39,7 +39,6 @@ var (
 func (s *Storage) ensureIndexes() error {
 	s.log.Debugf("Ensure indexes")
 	var errs []string
-
 	for _, collectionName := range Collections {
 		collection := s.db.C(collectionName)
 		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
@@ -55,7 +54,13 @@ func (s *Storage) ensureIndexes() error {
 			errs = append(errs, err.Error())
 		}
 		switch collectionName {
-		case DeploymentCollection, ResourceQuotasCollection, IngressCollection, ServiceCollection, PVCCollection, SecretsCollection, ConfigMapsCollection:
+		case DeploymentCollection,
+			ResourceQuotasCollection,
+			IngressCollection,
+			ServiceCollection,
+			PVCCollection,
+			SecretsCollection,
+			ConfigMapsCollection:
 			if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
 				errs = append(errs, err.Error())
 			}
@@ -65,10 +70,8 @@ func (s *Storage) ensureIndexes() error {
 			}
 		}
 	}
-
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, ","))
 	}
-
 	return nil
 }
