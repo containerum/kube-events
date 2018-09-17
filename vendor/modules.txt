@@ -287,4 +287,5 @@ k8s.io/client-go/listers/storage/v1beta1
 # k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c
 k8s.io/kube-openapi/pkg/common
 # k8s.io/kubernetes v1.11.2
+k8s.io/kubernetes/pkg/controller/volume/events
 k8s.io/kubernetes/pkg/kubelet/events

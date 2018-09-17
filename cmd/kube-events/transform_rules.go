@@ -91,13 +91,11 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 	kubeEvent := event.Object.(*core_v1.Event)
 	ret := kubeClientModel.Event{
 		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
+		Name:              kubeEvent.Reason,
 		ResourceName:      kubeEvent.InvolvedObject.Name,
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
 		Message:           kubeEvent.Message,
-		Details: map[string]string{
-			"reason": kubeEvent.Reason,
-		},
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {

@@ -11,6 +11,6 @@ const (
 	ObservableIngress               ObservableResource = "ingress"
 	ObservablePersistentVolumeClaim ObservableResource = "pvc"
 	ObservableNode                  ObservableResource = "node"
-	ObservableSecret                ObservableResource = "secrer"
+	ObservableSecret                ObservableResource = "secret"
 	ObservableConfigMap             ObservableResource = "cm"
 )
