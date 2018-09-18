@@ -44,12 +44,6 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("resourcenamespace"); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndexKey("resourcename", "resourcenamespace"); err != nil {
-			errs = append(errs, err.Error())
-		}
 		switch collectionName {
 		case DeploymentCollection,
 			ResourceQuotasCollection,
@@ -61,14 +55,20 @@ func (s *Storage) ensureIndexes() error {
 			if err := collection.EnsureIndex(uniqueAddedIndex); err != nil {
 				errs = append(errs, err.Error())
 			}
+			if err := collection.EnsureIndexKey("resourcenamespace", "dateadded"); err != nil {
+				errs = append(errs, err.Error())
+			}
+			if err := collection.EnsureIndexKey("resourcename", "resourcenamespace", "dateadded"); err != nil {
+				errs = append(errs, err.Error())
+			}
 		case EventsCollection:
 			if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
 				errs = append(errs, err.Error())
 			}
-			if err := collection.EnsureIndexKey("resourcetype", "resourcename", "resourcenamespace"); err != nil {
+			if err := collection.EnsureIndexKey("resourcetype", "resourcename", "resourcenamespace", "dateadded"); err != nil {
 				errs = append(errs, err.Error())
 			}
-			if err := collection.EnsureIndexKey("resourcetype", "resourcenamespace"); err != nil {
+			if err := collection.EnsureIndexKey("resourcetype", "resourcenamespace", "dateadded"); err != nil {
 				errs = append(errs, err.Error())
 			}
 		}
