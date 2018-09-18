@@ -44,13 +44,10 @@ func (s *Storage) ensureIndexes() error {
 		if err := collection.EnsureIndex(dateExpirationIndex); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("eventname"); err != nil {
+		if err := collection.EnsureIndexKey("resourcenamespace"); err != nil {
 			errs = append(errs, err.Error())
 		}
-		if err := collection.EnsureIndexKey("resourcename"); err != nil {
-			errs = append(errs, err.Error())
-		}
-		if err := collection.EnsureIndexKey("eventname", "resourcename"); err != nil {
+		if err := collection.EnsureIndexKey("resourcename", "resourcenamespace"); err != nil {
 			errs = append(errs, err.Error())
 		}
 		switch collectionName {
@@ -66,6 +63,12 @@ func (s *Storage) ensureIndexes() error {
 			}
 		case EventsCollection:
 			if err := collection.EnsureIndex(uniqueEventsIndex); err != nil {
+				errs = append(errs, err.Error())
+			}
+			if err := collection.EnsureIndexKey("resourcetype", "resourcename", "resourcenamespace"); err != nil {
+				errs = append(errs, err.Error())
+			}
+			if err := collection.EnsureIndexKey("resourcetype", "resourcenamespace"); err != nil {
 				errs = append(errs, err.Error())
 			}
 		}
