@@ -41,6 +41,7 @@ require (
 	gopkg.in/urfave/cli.v2 v2.0.0-20180128182452-d3ae77c26ac8
 	gopkg.in/yaml.v2 v2.2.1 // indirect
 	k8s.io/api v0.0.0-20180913155108-f456898a08e4
+	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408
 	k8s.io/apimachinery v0.0.0-20180126010752-19e3f5aa3adc
 	k8s.io/client-go v6.0.0+incompatible
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect

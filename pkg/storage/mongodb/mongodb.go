@@ -17,6 +17,7 @@ const (
 	ConfigMapsCollection     = "configmaps"
 	UserCollection           = "user"
 	SystemCollection         = "system"
+	CRDCollection            = "crd"
 )
 
 var Collections = []string{
@@ -30,6 +31,7 @@ var Collections = []string{
 	ConfigMapsCollection,
 	UserCollection,
 	SystemCollection,
+	CRDCollection,
 }
 
 type Config struct {
@@ -93,6 +95,9 @@ func OpenConnection(cfg *Config) (*Storage, error) {
 			return nil, err
 		}
 		if err := storage.createCollectionIfNotExist(SystemCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
+			return nil, err
+		}
+		if err := storage.createCollectionIfNotExist(CRDCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
 			return nil, err
 		}
 	}

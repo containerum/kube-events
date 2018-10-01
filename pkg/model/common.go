@@ -4,13 +4,14 @@ package model
 type ObservableResource string
 
 const (
-	ObservableNamespace             ObservableResource = "namespace"
-	ObservableDeployment            ObservableResource = "deployment"
-	ObservableEvent                 ObservableResource = "event"
-	ObservableService               ObservableResource = "service"
-	ObservableIngress               ObservableResource = "ingress"
-	ObservablePersistentVolumeClaim ObservableResource = "pvc"
-	ObservableNode                  ObservableResource = "node"
-	ObservableSecret                ObservableResource = "secret"
-	ObservableConfigMap             ObservableResource = "cm"
+	ObservableNamespace                ObservableResource = "namespace"
+	ObservableDeployment               ObservableResource = "deployment"
+	ObservableEvent                    ObservableResource = "event"
+	ObservableService                  ObservableResource = "service"
+	ObservableIngress                  ObservableResource = "ingress"
+	ObservablePersistentVolumeClaim    ObservableResource = "pvc"
+	ObservableNode                     ObservableResource = "node"
+	ObservableSecret                   ObservableResource = "secret"
+	ObservableConfigMap                ObservableResource = "cm"
+	ObservableCustomResourceDefinition ObservableResource = "crd"
 )

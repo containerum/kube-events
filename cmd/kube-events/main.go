@@ -25,15 +25,16 @@ var eventTransformer = transform.EventTransformer{
 		return string(ObservableTypeFromObject(event.Object))
 	},
 	Rules: map[string]transform.Func{
-		string(model.ObservableNamespace):             MakeNamespaceRecord,
-		string(model.ObservableDeployment):            MakeDeployRecord,
-		string(model.ObservableEvent):                 MakeEventRecord,
-		string(model.ObservableService):               MakeServiceRecord,
-		string(model.ObservableIngress):               MakeIngressRecord,
-		string(model.ObservablePersistentVolumeClaim): MakePVCRecord,
-		string(model.ObservableNode):                  MakeNodeRecord,
-		string(model.ObservableSecret):                MakeSecretRecord,
-		string(model.ObservableConfigMap):             MakeConfigMapRecord,
+		string(model.ObservableNamespace):                MakeNamespaceRecord,
+		string(model.ObservableDeployment):               MakeDeployRecord,
+		string(model.ObservableEvent):                    MakeEventRecord,
+		string(model.ObservableService):                  MakeServiceRecord,
+		string(model.ObservableIngress):                  MakeIngressRecord,
+		string(model.ObservablePersistentVolumeClaim):    MakePVCRecord,
+		string(model.ObservableNode):                     MakeNodeRecord,
+		string(model.ObservableSecret):                   MakeSecretRecord,
+		string(model.ObservableConfigMap):                MakeConfigMapRecord,
+		string(model.ObservableCustomResourceDefinition): MakeCRDRecord,
 	},
 }
 
@@ -157,6 +158,12 @@ func action(ctx *cli.Context) error {
 	defer eventBuffer.Stop()
 	go eventBuffer.RunCollection(mongodb.EventsCollection)
 
+	//CRD
+	defer watchers.CRD.Stop()
+	crdBuffer := setupBuffer(ctx, mongoStorage, eventTransformer.Output(watchers.CRD.ResultChan()))
+	defer crdBuffer.Stop()
+	go crdBuffer.RunCollection(mongodb.CRDCollection)
+
 	pingStopChan := make(chan struct{})
 	defer close(pingStopChan)
 	pingErrChan := make(chan error)
@@ -193,6 +200,7 @@ func main() {
 			&bufferFlushPeriodFlag,
 			&bufferMinInsertEventsFlag,
 			&connectTimeoutFlag,
+			//			&excludedNamespacesFlag,
 		},
 		Before: printFlags,
 		Action: action,

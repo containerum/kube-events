@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	apiextensions_v1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/kube-events/pkg/model"
 	apps_v1 "k8s.io/api/apps/v1"
@@ -31,6 +33,8 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 		return model.ObservableConfigMap
 	case *core_v1.Node:
 		return model.ObservableNode
+	case *apiextensions_v1beta1.CustomResourceDefinition:
+		return model.ObservableCustomResourceDefinition
 	case *core_v1.Event:
 		event := object.(*core_v1.Event)
 		switch event.InvolvedObject.Kind {
@@ -235,6 +239,25 @@ func MakeNodeRecord(event watch.Event) kubeClientModel.Event {
 		Time:         time.Now().Format(time.RFC3339),
 		Kind:         kubeClientModel.EventInfo,
 		ResourceName: node.Name,
+		ResourceType: kubeClientModel.TypeNode,
+	}
+	switch event.Type {
+	case watch.Added:
+		ret.Name = kubeClientModel.ResourceCreated
+	case watch.Modified:
+		ret.Name = kubeClientModel.ResourceModified
+	case watch.Deleted:
+		ret.Name = kubeClientModel.ResourceDeleted
+	}
+	return ret
+}
+
+func MakeCRDRecord(event watch.Event) kubeClientModel.Event {
+	crd := event.Object.(*apiextensions_v1beta1.CustomResourceDefinition)
+	ret := kubeClientModel.Event{
+		Time:         time.Now().Format(time.RFC3339),
+		Kind:         kubeClientModel.EventInfo,
+		ResourceName: crd.Name,
 		ResourceType: kubeClientModel.TypeNode,
 	}
 	switch event.Type {

@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/kube-events/pkg/storage"
 	"github.com/containerum/kube-events/pkg/storage/mongodb"
@@ -98,6 +100,12 @@ var (
 		Usage:   "Kubernetes connection timeout.",
 		Value:   5 * time.Second,
 	}
+
+/*	excludedNamespacesFlag = cli.StringSliceFlag{
+	Name:    "exclude_ns",
+	EnvVars: []string{"EXCLUDED_NS"},
+	Usage:   "excluded namespaces",
+}*/
 )
 
 func setupLogs(ctx *cli.Context) {
@@ -134,9 +142,15 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 		return nil, err
 	}
 
+	apiExtensions, err := clientset.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Kube{
-		Clientset: kubecli,
-		config:    config,
+		Clientset:    kubecli,
+		config:       config,
+		apiExtension: apiExtensions,
 	}, nil
 }
 
