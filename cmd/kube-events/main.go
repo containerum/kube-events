@@ -194,8 +194,6 @@ func main() {
 			&mongoUserFlag,
 			&mongoPasswordFlag,
 			&mongoDatabaseFlag,
-			&mongoCollectionSizeFlag,
-			&mongoCollectionMaxDocsFlag,
 			&bufferCapacityFlag,
 			&bufferFlushPeriodFlag,
 			&bufferMinInsertEventsFlag,

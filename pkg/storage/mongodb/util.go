@@ -18,11 +18,9 @@ func (s *Storage) isCollectionExist(name string) (bool, error) {
 	return false, nil
 }
 
-func (s *Storage) createCollectionIfNotExist(name string, size uint64, maxDocs uint) error {
+func (s *Storage) createCollectionIfNotExist(name string) error {
 	s.log.WithFields(logrus.Fields{
-		"name":     name,
-		"size":     size,
-		"max_docs": maxDocs,
+		"name": name,
 	}).Debugf("Create collection if not exists")
 	exist, err := s.isCollectionExist(name)
 	if err != nil {
