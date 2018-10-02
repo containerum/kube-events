@@ -13,9 +13,8 @@ import (
 
 var (
 	uniqueAddedIndex = mgo.Index{
-		Name:     "unique_resource_added",
-		Key:      []string{"eventname", "resourceuid"},
-		DropDups: true,
+		Name: "unique_resource_added",
+		Key:  []string{"eventname", "resourceuid"},
 		PartialFilter: bson.M{
 			"eventname": kubeClientModel.ResourceCreated,
 		},
@@ -23,10 +22,9 @@ var (
 	}
 
 	uniqueEventsIndex = mgo.Index{
-		Name:     "unique_resourceuid",
-		Key:      []string{"resourceuid"},
-		DropDups: true,
-		Unique:   true,
+		Name:   "unique_resourceuid",
+		Key:    []string{"resourceuid"},
+		Unique: true,
 	}
 
 	dateExpirationIndex = mgo.Index{

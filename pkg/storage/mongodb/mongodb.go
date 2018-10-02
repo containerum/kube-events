@@ -32,69 +32,58 @@ var Collections = []string{
 	SystemCollection,
 }
 
-type Config struct {
-	mgo.DialInfo
-
-	CollectionSize uint64 // in bytes
-	MaxDocuments   uint
-}
-
 type Storage struct {
 	db  *mgo.Database
 	log *logrus.Entry
 }
 
-func OpenConnection(cfg *Config) (*Storage, error) {
+func OpenConnection(cfg *mgo.DialInfo) (*Storage, error) {
 	log := logrus.WithField("component", "mongo-storage")
 	log.WithFields(logrus.Fields{
-		"addrs":           cfg.Addrs,
-		"user":            cfg.Username,
-		"database":        cfg.Database,
-		"collection_size": cfg.CollectionSize,
-		"max_docs":        cfg.MaxDocuments,
+		"addrs":    cfg.Addrs,
+		"user":     cfg.Username,
+		"database": cfg.Database,
 	}).Info("Opening connection with MongoDB")
-	session, err := mgo.DialWithInfo(&cfg.DialInfo)
+	session, err := mgo.DialWithInfo(cfg)
 	if err != nil {
 		return nil, err
 	}
-	db := session.DB(cfg.DialInfo.Database)
+	db := session.DB(cfg.Database)
 
 	storage := &Storage{
 		db:  db,
 		log: log,
 	}
 
-	if cfg.CollectionSize > 0 {
-		if err := storage.createCollectionIfNotExist(EventsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(DeploymentCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(ResourceQuotasCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(ServiceCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(IngressCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(PVCCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(SecretsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(ConfigMapsCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(UserCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
-		if err := storage.createCollectionIfNotExist(SystemCollection, cfg.CollectionSize, cfg.MaxDocuments); err != nil {
-			return nil, err
-		}
+	if err := storage.createCollectionIfNotExist(EventsCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(DeploymentCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(ResourceQuotasCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(ServiceCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(IngressCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(PVCCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(SecretsCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(ConfigMapsCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(UserCollection); err != nil {
+		return nil, err
+	}
+	if err := storage.createCollectionIfNotExist(SystemCollection); err != nil {
+		return nil, err
 	}
 
 	if err := storage.ensureIndexes(); err != nil {

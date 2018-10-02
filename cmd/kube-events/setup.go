@@ -59,18 +59,6 @@ var (
 		Value:   "kube-watches",
 	}
 
-	mongoCollectionSizeFlag = cli.Uint64Flag{
-		Name:    "mongo-collection-size",
-		EnvVars: []string{"MONGO_COLLECTION_SIZE"},
-		Usage:   "Capped collection size in bytes. If unspecified, capped collections will not be used.",
-	}
-
-	mongoCollectionMaxDocsFlag = cli.UintFlag{
-		Name:    "mongo-collection-max-docs",
-		EnvVars: []string{"MONGO_COLLECTION_MAX_DOCS"},
-		Usage:   "Maximum document count in collection. Will be applied only if mongo-collection-size specified.",
-	}
-
 	bufferCapacityFlag = cli.IntFlag{
 		Name:    "buffer-capacity",
 		EnvVars: []string{"BUFFER_CAPACITY"},
@@ -152,16 +140,12 @@ func (ml *MongoLogrusAdapter) Output(callDepth int, s string) error {
 func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
 	mgo.SetDebug(ctx.Bool(debugFlag.Name))
 	mgo.SetLogger(&MongoLogrusAdapter{Log: logrus.WithField("component", "mgo")})
-	return mongodb.OpenConnection(&mongodb.Config{
-		DialInfo: mgo.DialInfo{
-			Addrs:     ctx.StringSlice(mongoAddressFlag.Name),
-			Database:  ctx.String(mongoDatabaseFlag.Name),
-			Mechanism: "SCRAM-SHA-1",
-			Username:  ctx.String(mongoUserFlag.Name),
-			Password:  ctx.String(mongoPasswordFlag.Name),
-		},
-		CollectionSize: ctx.Uint64(mongoCollectionSizeFlag.Name),
-		MaxDocuments:   ctx.Uint(mongoCollectionMaxDocsFlag.Name),
+	return mongodb.OpenConnection(&mgo.DialInfo{
+		Addrs:     ctx.StringSlice(mongoAddressFlag.Name),
+		Database:  ctx.String(mongoDatabaseFlag.Name),
+		Mechanism: "SCRAM-SHA-1",
+		Username:  ctx.String(mongoUserFlag.Name),
+		Password:  ctx.String(mongoPasswordFlag.Name),
 	})
 }
 
