@@ -68,7 +68,7 @@ func EventsFilter(event watch.Event) bool {
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
-	case "Pod", "PersistentVolumeClaim":
+	case "Pod", "PersistentVolumeClaim", "Node":
 		return true
 	default:
 		return false

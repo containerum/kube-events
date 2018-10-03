@@ -34,7 +34,7 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	case *core_v1.Event:
 		event := object.(*core_v1.Event)
 		switch event.InvolvedObject.Kind {
-		case "Pod", "PersistentVolumeClaim":
+		case "Pod", "PersistentVolumeClaim", "Node":
 			return model.ObservableEvent
 		default:
 			panic("Unsupported event involved object kind " + event.InvolvedObject.Kind)
