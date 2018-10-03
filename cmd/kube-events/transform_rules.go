@@ -62,6 +62,8 @@ func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -84,6 +86,8 @@ func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -114,6 +118,8 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 
 	if errorReasons.isErrorReason(kubeEvent.Reason) {
 		ret.Kind = kubeClientModel.EventWarning
+	} else if event.Type == watch.Error {
+		ret.Kind = kubeClientModel.EventError
 	} else {
 		ret.Kind = kubeClientModel.EventInfo
 	}
@@ -138,6 +144,8 @@ func MakeServiceRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -160,6 +168,8 @@ func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -184,6 +194,8 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 			ret.Name = kubeClientModel.ResourceModified
 		case watch.Deleted:
 			ret.Name = kubeClientModel.ResourceDeleted
+		case watch.Error:
+			ret.Kind = kubeClientModel.EventError
 		}
 	default:
 		panic("unknown resource type!")
@@ -209,6 +221,8 @@ func MakeSecretRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -231,6 +245,8 @@ func MakeConfigMapRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -251,6 +267,8 @@ func MakeNodeRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
