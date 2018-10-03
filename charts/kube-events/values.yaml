@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: containerum/kube-events
   tag: v1.0.0
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   secret:
 
 rbac:
