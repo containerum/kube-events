@@ -53,13 +53,13 @@ func (k *Kube) WatchSupportedResources() Watchers {
 	}, ","))
 
 	return Watchers{
-		ResourceQuotas: transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter, ErrorFilter),
-		Deployments:    transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter, ErrorFilter),
-		Events:         transform.NewFilteredWatch(eventWatch, EventsFilter, ErrorFilter),
-		Services:       transform.NewFilteredWatch(serviceWatch, ErrorFilter),
-		Ingresses:      transform.NewFilteredWatch(ingressWatch, ErrorFilter),
-		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter, ErrorFilter),
-		Secrets:        transform.NewFilteredWatch(secretWatch, ErrorFilter),
-		ConfigMaps:     transform.NewFilteredWatch(cmWatch, ErrorFilter),
+		ResourceQuotas: transform.NewFilteredWatch(rqWatch, ResourceQuotaFilter),
+		Deployments:    transform.NewFilteredWatch(deplWatch, NewDeployFilter().Filter),
+		Events:         transform.NewFilteredWatch(eventWatch, EventsFilter),
+		Services:       transform.NewFilteredWatch(serviceWatch),
+		Ingresses:      transform.NewFilteredWatch(ingressWatch),
+		PVCs:           transform.NewFilteredWatch(pvcWatch, PVCFilter),
+		Secrets:        transform.NewFilteredWatch(secretWatch),
+		ConfigMaps:     transform.NewFilteredWatch(cmWatch),
 	}
 }

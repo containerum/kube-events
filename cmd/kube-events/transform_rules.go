@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
@@ -34,7 +35,7 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	case *core_v1.Event:
 		event := object.(*core_v1.Event)
 		switch event.InvolvedObject.Kind {
-		case "Pod", "PersistentVolumeClaim":
+		case "Pod", "PersistentVolumeClaim", "Node":
 			return model.ObservableEvent
 		default:
 			panic("Unsupported event involved object kind " + event.InvolvedObject.Kind)
@@ -61,6 +62,8 @@ func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -83,6 +86,8 @@ func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -96,17 +101,25 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
 		Message:           kubeEvent.Message,
+		Details:           map[string]string{},
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
 	case "Pod":
 		ret.ResourceType = kubeClientModel.TypePod
+		if kubeEvent.InvolvedObject.FieldPath != "" {
+			ret.Details["container"] = strings.TrimSuffix(strings.TrimPrefix(kubeEvent.InvolvedObject.FieldPath, "spec.containers{"), "}")
+		}
 	case "PersistentVolumeClaim":
 		ret.ResourceType = kubeClientModel.TypeVolume
+	case "Node":
+		ret.ResourceType = kubeClientModel.TypeNode
 	}
 
 	if errorReasons.isErrorReason(kubeEvent.Reason) {
 		ret.Kind = kubeClientModel.EventWarning
+	} else if event.Type == watch.Error {
+		ret.Kind = kubeClientModel.EventError
 	} else {
 		ret.Kind = kubeClientModel.EventInfo
 	}
@@ -131,6 +144,8 @@ func MakeServiceRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -153,6 +168,8 @@ func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -177,6 +194,8 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 			ret.Name = kubeClientModel.ResourceModified
 		case watch.Deleted:
 			ret.Name = kubeClientModel.ResourceDeleted
+		case watch.Error:
+			ret.Kind = kubeClientModel.EventError
 		}
 	default:
 		panic("unknown resource type!")
@@ -202,6 +221,8 @@ func MakeSecretRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -224,6 +245,8 @@ func MakeConfigMapRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }
@@ -244,6 +267,8 @@ func MakeNodeRecord(event watch.Event) kubeClientModel.Event {
 		ret.Name = kubeClientModel.ResourceModified
 	case watch.Deleted:
 		ret.Name = kubeClientModel.ResourceDeleted
+	case watch.Error:
+		ret.Kind = kubeClientModel.EventError
 	}
 	return ret
 }

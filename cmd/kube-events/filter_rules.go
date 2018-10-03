@@ -58,7 +58,10 @@ func ResourceQuotaFilter(event watch.Event) bool {
 }
 
 func EventsFilter(event watch.Event) bool {
-	if event.Type != watch.Added {
+	switch event.Type {
+	case watch.Added, watch.Error:
+		//pass
+	default:
 		return false
 	}
 
@@ -68,7 +71,7 @@ func EventsFilter(event watch.Event) bool {
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
-	case "Pod", "PersistentVolumeClaim":
+	case "Pod", "PersistentVolumeClaim", "Node":
 		return true
 	default:
 		return false
