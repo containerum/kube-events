@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
@@ -96,13 +97,19 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
 		Message:           kubeEvent.Message,
+		Details:           map[string]string{},
 	}
 
 	switch kubeEvent.InvolvedObject.Kind {
 	case "Pod":
 		ret.ResourceType = kubeClientModel.TypePod
+		if kubeEvent.InvolvedObject.FieldPath != "" {
+			ret.Details["container"] = strings.TrimSuffix(strings.TrimPrefix(kubeEvent.InvolvedObject.FieldPath, "spec.containers{"), "}")
+		}
 	case "PersistentVolumeClaim":
 		ret.ResourceType = kubeClientModel.TypeVolume
+	case "Node":
+		ret.ResourceType = kubeClientModel.TypeNode
 	}
 
 	if errorReasons.isErrorReason(kubeEvent.Reason) {
