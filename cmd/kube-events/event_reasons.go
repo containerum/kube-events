@@ -1,6 +1,8 @@
 package main
 
 import (
+	"regexp"
+
 	core_v1 "k8s.io/api/core/v1"
 	volume_events "k8s.io/kubernetes/pkg/controller/volume/events"
 	kubelet_events "k8s.io/kubernetes/pkg/kubelet/events"
@@ -72,7 +74,7 @@ func (errs eventSet) check(reason string) bool {
 	return isErr
 }
 
-//White list of events reasons with black list of messages
+//Whitelist of events reasons with blacklist of messages (blacklist entry is regexp)
 type wlblReasonsMessages map[string][]string
 
 var eventsWhitelist = wlblReasonsMessages{
@@ -130,7 +132,7 @@ func (errs wlblReasonsMessages) check(event *core_v1.Event) bool {
 	}
 
 	for _, blEntry := range bl {
-		if blEntry == event.Message {
+		if match, _ := regexp.Match(blEntry, []byte(event.Message)); match {
 			return false
 		}
 	}
