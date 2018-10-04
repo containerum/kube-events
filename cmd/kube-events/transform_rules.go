@@ -96,7 +96,6 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 	kubeEvent := event.Object.(*core_v1.Event)
 	ret := kubeClientModel.Event{
 		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
-		Name:              kubeEvent.Reason,
 		ResourceName:      kubeEvent.InvolvedObject.Name,
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
@@ -134,7 +133,7 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		ret.ResourceType = kubeClientModel.TypeNode
 	}
 
-	if ret.Name == "" {
+	if ret.Name == "" || ret.Kind == "" {
 		//Default event kind and name
 		if event.Type == watch.Error {
 			ret.Kind = kubeClientModel.EventError
