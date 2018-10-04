@@ -113,10 +113,10 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		}
 		//Event kind and name
 		switch {
-		case podFailedReasons.isEventReason(kubeEvent.Reason):
+		case podFailedReasons.check(kubeEvent.Reason):
 			ret.Kind = kubeClientModel.EventWarning
 			ret.Name = "PodFailed"
-		case podKillFailedReasons.isEventReason(kubeEvent.Reason):
+		case podKillFailedReasons.check(kubeEvent.Reason):
 			ret.Kind = kubeClientModel.EventWarning
 			ret.Name = "PodKillFailed"
 		}
@@ -124,7 +124,7 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		//Resource type
 		ret.ResourceType = kubeClientModel.TypeVolume
 		//Event kind and name
-		if volumeProvisionSuccessfulReasons.isEventReason(kubeEvent.Reason) {
+		if volumeProvisionSuccessfulReasons.check(kubeEvent.Reason) {
 			ret.Kind = kubeClientModel.EventInfo
 			ret.Name = "VolumeSuccessful"
 		}
@@ -137,7 +137,7 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 		//Default event kind and name
 		if event.Type == watch.Error {
 			ret.Kind = kubeClientModel.EventError
-		} else if errorReasons.isEventReason(kubeEvent.Reason) {
+		} else if errorReasons.check(kubeEvent.Reason) {
 			ret.Kind = kubeClientModel.EventWarning
 		} else {
 			ret.Kind = kubeClientModel.EventInfo
