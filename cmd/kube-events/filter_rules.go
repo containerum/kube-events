@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"k8s.io/api/apps/v1"
-
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
@@ -72,10 +71,13 @@ func EventsFilter(event watch.Event) bool {
 
 	switch kubeEvent.InvolvedObject.Kind {
 	case "Pod", "PersistentVolumeClaim", "Node":
-		return true
+		//pass
 	default:
 		return false
 	}
+
+	//Allow events reasons only from whitelist with messages not in blacklist
+	return eventsWhitelist.check(kubeEvent)
 }
 
 func PVCFilter(event watch.Event) bool {
