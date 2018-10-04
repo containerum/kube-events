@@ -7,7 +7,8 @@ import (
 
 type errorSet map[string]interface{}
 
-var errorReasons = errorSet{kubelet_events.FailedToCreateContainer: nil,
+var errorReasons = errorSet{
+	kubelet_events.FailedToCreateContainer:    nil,
 	kubelet_events.FailedToKillPod:            nil,
 	kubelet_events.FailedToCreatePodContainer: nil,
 	kubelet_events.NetworkNotReady:            nil,
@@ -43,9 +44,29 @@ var errorReasons = errorSet{kubelet_events.FailedToCreateContainer: nil,
 	volume_events.VolumeFailedDelete:        nil,
 	volume_events.ProvisioningFailed:        nil,
 	volume_events.ProvisioningCleanupFailed: nil,
+
+	"FailedScheduling": nil,
 }
 
-func (errs errorSet) isErrorReason(reason string) bool {
+var podFailedReasons = errorSet{
+	kubelet_events.FailedToCreateContainer:    nil,
+	kubelet_events.BackOffStartContainer:      nil,
+	kubelet_events.FailedToCreatePodContainer: nil,
+	kubelet_events.FailedCreatePodSandBox:     nil,
+	"FailedScheduling":                        nil,
+}
+
+var podKillFailedReasons = errorSet{
+	kubelet_events.FailedToKillPod:     nil,
+	kubelet_events.ExceededGracePeriod: nil,
+}
+
+var volumeProvisionSuccessfulReasons = errorSet{
+	kubelet_events.VolumeResizeSuccess:  nil,
+	volume_events.ProvisioningSucceeded: nil,
+}
+
+func (errs errorSet) isEventReason(reason string) bool {
 	_, isErr := errs[reason]
 	return isErr
 }

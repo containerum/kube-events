@@ -96,7 +96,6 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 	kubeEvent := event.Object.(*core_v1.Event)
 	ret := kubeClientModel.Event{
 		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
-		Name:              kubeEvent.Reason,
 		ResourceName:      kubeEvent.InvolvedObject.Name,
 		ResourceUID:       string(kubeEvent.UID),
 		ResourceNamespace: kubeEvent.Namespace,
@@ -106,23 +105,46 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 
 	switch kubeEvent.InvolvedObject.Kind {
 	case "Pod":
+		//Resource type
 		ret.ResourceType = kubeClientModel.TypePod
+		//Container name
 		if kubeEvent.InvolvedObject.FieldPath != "" {
 			ret.Details["container"] = strings.TrimSuffix(strings.TrimPrefix(kubeEvent.InvolvedObject.FieldPath, "spec.containers{"), "}")
 		}
+		//Event kind and name
+		switch {
+		case podFailedReasons.isEventReason(kubeEvent.Reason):
+			ret.Kind = kubeClientModel.EventWarning
+			ret.Name = "PodFailed"
+		case podKillFailedReasons.isEventReason(kubeEvent.Reason):
+			ret.Kind = kubeClientModel.EventWarning
+			ret.Name = "PodKillFailed"
+		}
 	case "PersistentVolumeClaim":
+		//Resource type
 		ret.ResourceType = kubeClientModel.TypeVolume
+		//Event kind and name
+		if volumeProvisionSuccessfulReasons.isEventReason(kubeEvent.Reason) {
+			ret.Kind = kubeClientModel.EventInfo
+			ret.Name = "VolumeSuccessful"
+		}
 	case "Node":
+		//Resource type
 		ret.ResourceType = kubeClientModel.TypeNode
 	}
 
-	if errorReasons.isErrorReason(kubeEvent.Reason) {
-		ret.Kind = kubeClientModel.EventWarning
-	} else if event.Type == watch.Error {
-		ret.Kind = kubeClientModel.EventError
-	} else {
-		ret.Kind = kubeClientModel.EventInfo
+	if ret.Name == "" || ret.Kind == "" {
+		//Default event kind and name
+		if event.Type == watch.Error {
+			ret.Kind = kubeClientModel.EventError
+		} else if errorReasons.isEventReason(kubeEvent.Reason) {
+			ret.Kind = kubeClientModel.EventWarning
+		} else {
+			ret.Kind = kubeClientModel.EventInfo
+		}
+		ret.Name = kubeEvent.Reason
 	}
+
 	return ret
 }
 
