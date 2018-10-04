@@ -98,7 +98,6 @@ var eventsWhitelist = wlblReasonsMessages{
 	kubelet_events.NetworkNotReady:            nil,
 	kubelet_events.FailedSync:                 nil,
 	kubelet_events.FailedCreatePodSandBox:     nil,
-	"Scheduled":                               nil,
 	"FailedScheduling":                        nil,
 
 	volume_events.FailedBinding:             nil,
