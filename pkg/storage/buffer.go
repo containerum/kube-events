@@ -5,7 +5,7 @@ import (
 	"time"
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type EventInserter interface {
@@ -34,12 +34,12 @@ type RecordBuffer struct {
 	insertStop  chan struct{}
 	insertTimer *time.Ticker
 
-	log *logrus.Entry
+	log *log.Entry
 }
 
 func NewRecordBuffer(cfg RecordBufferConfig) *RecordBuffer {
-	log := logrus.WithField("component", "record_buffer")
-	log.WithFields(logrus.Fields{
+	rbLog := log.WithField("component", "record_buffer")
+	rbLog.WithFields(log.Fields{
 		"capacity":          cfg.BufferCap,
 		"insert_period":     cfg.InsertPeriod,
 		"min_insert_events": cfg.MinInsertEvents,
@@ -51,7 +51,7 @@ func NewRecordBuffer(cfg RecordBufferConfig) *RecordBuffer {
 		readStop:    make(chan struct{}),
 		insertStop:  make(chan struct{}),
 		insertTimer: time.NewTicker(cfg.InsertPeriod),
-		log:         log,
+		log:         rbLog,
 	}
 }
 

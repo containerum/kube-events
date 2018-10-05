@@ -15,7 +15,7 @@ import (
 
 	"github.com/containerum/kube-events/pkg/model"
 	"github.com/containerum/kube-events/pkg/transform"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -71,7 +71,7 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 		case <-stopChan:
 			return
 		case <-ticker.C:
-			logrus.Debug("Ping kube ", req.URL)
+			log.Debug("Ping kube ", req.URL)
 			resp, err := httpClient.Do(&req)
 			if err != nil {
 				errChan <- err
@@ -168,7 +168,7 @@ func action(ctx *cli.Context) error {
 	case <-sigch:
 		return nil
 	case err := <-pingErrChan:
-		logrus.WithError(err).Errorf("Ping kube failed")
+		log.WithError(err).Errorf("Ping kube failed")
 		os.Exit(1)
 	}
 

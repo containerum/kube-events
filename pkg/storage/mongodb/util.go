@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"github.com/globalsign/mgo"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *Storage) isCollectionExist(name string) (bool, error) {
@@ -19,7 +19,7 @@ func (s *Storage) isCollectionExist(name string) (bool, error) {
 }
 
 func (s *Storage) createCollectionIfNotExist(name string) error {
-	s.log.WithFields(logrus.Fields{
+	s.log.WithFields(log.Fields{
 		"name": name,
 	}).Debugf("Create collection if not exists")
 	exist, err := s.isCollectionExist(name)

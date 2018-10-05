@@ -6,7 +6,7 @@ import (
 	"github.com/containerum/kube-events/pkg/transform"
 
 	"github.com/containerum/kube-events/pkg/informerwatch"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -41,7 +41,7 @@ func (k *Kube) WatchSupportedResources() Watchers {
 	secretWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().Secrets().Informer())
 	cmWatch := informerwatch.NewInformerWatch(informerFactory.Core().V1().ConfigMaps().Informer())
 
-	logrus.Infof("Watching for: %s", strings.Join([]string{
+	log.Infof("Watching for: %s", strings.Join([]string{
 		"ResourceQuota",
 		"Deployment",
 		"Event",

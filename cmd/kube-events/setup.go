@@ -7,7 +7,7 @@ import (
 	"github.com/containerum/kube-events/pkg/storage"
 	"github.com/containerum/kube-events/pkg/storage/mongodb"
 	"github.com/globalsign/mgo"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -90,15 +90,15 @@ var (
 
 func setupLogs(ctx *cli.Context) {
 	if ctx.Bool(debugFlag.Name) {
-		logrus.SetLevel(logrus.DebugLevel)
+		log.SetLevel(log.DebugLevel)
 	} else {
-		logrus.SetLevel(logrus.InfoLevel)
+		log.SetLevel(log.InfoLevel)
 	}
 
 	if ctx.Bool(textlogFlag.Name) {
-		logrus.SetFormatter(&logrus.TextFormatter{})
+		log.SetFormatter(&log.TextFormatter{})
 	} else {
-		logrus.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&log.JSONFormatter{})
 	}
 }
 
@@ -107,10 +107,10 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 	var err error
 
 	if cfg := ctx.String(configFlag.Name); cfg == "" {
-		logrus.Info("Kube: Using InClusterConfig")
+		log.Info("Kube: Using InClusterConfig")
 		config, err = rest.InClusterConfig()
 	} else {
-		logrus.Info("Kube: Using config from ", cfg)
+		log.Info("Kube: Using config from ", cfg)
 		config, err = clientcmd.BuildConfigFromFlags("", cfg)
 	}
 	if err != nil {
@@ -129,7 +129,7 @@ func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 }
 
 type MongoLogrusAdapter struct {
-	Log *logrus.Entry
+	Log *log.Entry
 }
 
 func (ml *MongoLogrusAdapter) Output(callDepth int, s string) error {
@@ -139,7 +139,7 @@ func (ml *MongoLogrusAdapter) Output(callDepth int, s string) error {
 
 func setupMongo(ctx *cli.Context) (*mongodb.Storage, error) {
 	mgo.SetDebug(ctx.Bool(debugFlag.Name))
-	mgo.SetLogger(&MongoLogrusAdapter{Log: logrus.WithField("component", "mgo")})
+	mgo.SetLogger(&MongoLogrusAdapter{Log: log.WithField("component", "mgo")})
 	return mongodb.OpenConnection(&mgo.DialInfo{
 		Addrs:     ctx.StringSlice(mongoAddressFlag.Name),
 		Database:  ctx.String(mongoDatabaseFlag.Name),
