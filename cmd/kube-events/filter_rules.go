@@ -50,8 +50,20 @@ func ResourceQuotaFilter(event watch.Event) bool {
 		return false
 	}
 	if event.Type == watch.Modified {
-		return rq.Spec.Hard.Memory().Cmp(*rq.Status.Hard.Memory()) == 0 &&
-			rq.Spec.Hard.Cpu().Cmp(*rq.Status.Hard.Cpu()) == 0
+		specLimitsMemory := rq.Spec.Hard[core_v1.ResourceLimitsMemory]
+		specLimitsCPU := rq.Spec.Hard[core_v1.ResourceLimitsCPU]
+		specRequestsMemory := rq.Spec.Hard[core_v1.ResourceRequestsMemory]
+		specRequestsCPU := rq.Spec.Hard[core_v1.ResourceRequestsCPU]
+
+		statusLimitsMemory := rq.Status.Hard[core_v1.ResourceLimitsMemory]
+		statusLimitsCPU := rq.Status.Hard[core_v1.ResourceLimitsCPU]
+		statusRequestsMemory := rq.Status.Hard[core_v1.ResourceRequestsMemory]
+		statusRequestsCPU := rq.Status.Hard[core_v1.ResourceRequestsCPU]
+
+		return specLimitsMemory.Cmp(statusLimitsMemory) != 0 ||
+			specLimitsCPU.Cmp(statusLimitsCPU) != 0 ||
+			specRequestsMemory.Cmp(statusRequestsMemory) != 0 ||
+			specRequestsCPU.Cmp(statusRequestsCPU) != 0
 	}
 	return true
 }
@@ -94,8 +106,4 @@ func PVCFilter(event watch.Event) bool {
 		}
 	}
 	return true
-}
-
-func ErrorFilter(event watch.Event) bool {
-	return event.Type != watch.Error
 }
