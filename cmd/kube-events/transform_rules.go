@@ -7,33 +7,33 @@ import (
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/kube-events/pkg/model"
-	apps_v1 "k8s.io/api/apps/v1"
-	core_v1 "k8s.io/api/core/v1"
-	extensions_v1beta1 "k8s.io/api/extensions/v1beta1"
+	appsV1 "k8s.io/api/apps/v1"
+	coreV1 "k8s.io/api/core/v1"
+	extensionsV1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
 func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 	switch object.(type) {
-	case *core_v1.ResourceQuota:
+	case *coreV1.ResourceQuota:
 		return model.ObservableNamespace
-	case *apps_v1.Deployment:
+	case *appsV1.Deployment:
 		return model.ObservableDeployment
-	case *core_v1.Service:
+	case *coreV1.Service:
 		return model.ObservableService
-	case *extensions_v1beta1.Ingress:
+	case *extensionsV1beta1.Ingress:
 		return model.ObservableIngress
-	case *core_v1.PersistentVolumeClaim:
+	case *coreV1.PersistentVolumeClaim:
 		return model.ObservablePersistentVolumeClaim
-	case *core_v1.Secret:
+	case *coreV1.Secret:
 		return model.ObservableSecret
-	case *core_v1.ConfigMap:
+	case *coreV1.ConfigMap:
 		return model.ObservableConfigMap
-	case *core_v1.Node:
+	case *coreV1.Node:
 		return model.ObservableNode
-	case *core_v1.Event:
-		event := object.(*core_v1.Event)
+	case *coreV1.Event:
+		event := object.(*coreV1.Event)
 		switch event.InvolvedObject.Kind {
 		case "Pod", "PersistentVolumeClaim", "Node":
 			return model.ObservableEvent
@@ -46,7 +46,7 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 }
 
 func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
-	rq := event.Object.(*core_v1.ResourceQuota)
+	rq := event.Object.(*coreV1.ResourceQuota)
 	ret := kubeClientModel.Event{
 		Time:         time.Now().Format(time.RFC3339),
 		Kind:         kubeClientModel.EventInfo,
@@ -69,7 +69,7 @@ func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
-	depl := event.Object.(*apps_v1.Deployment)
+	depl := event.Object.(*appsV1.Deployment)
 	ret := kubeClientModel.Event{
 		Time:              time.Now().Format(time.RFC3339),
 		Kind:              kubeClientModel.EventInfo,
@@ -93,7 +93,7 @@ func MakeDeployRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeEventRecord(event watch.Event) kubeClientModel.Event {
-	kubeEvent := event.Object.(*core_v1.Event)
+	kubeEvent := event.Object.(*coreV1.Event)
 	ret := kubeClientModel.Event{
 		Time:              kubeEvent.FirstTimestamp.Time.Format(time.RFC3339),
 		ResourceName:      kubeEvent.InvolvedObject.Name,
@@ -149,7 +149,7 @@ func MakeEventRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeServiceRecord(event watch.Event) kubeClientModel.Event {
-	svc := event.Object.(*core_v1.Service)
+	svc := event.Object.(*coreV1.Service)
 	ret := kubeClientModel.Event{
 		Time:              time.Now().Format(time.RFC3339),
 		Kind:              kubeClientModel.EventInfo,
@@ -173,7 +173,7 @@ func MakeServiceRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
-	ingr := event.Object.(*extensions_v1beta1.Ingress)
+	ingr := event.Object.(*extensionsV1beta1.Ingress)
 	ret := kubeClientModel.Event{
 		Time:              time.Now().Format(time.RFC3339),
 		Kind:              kubeClientModel.EventInfo,
@@ -199,7 +199,7 @@ func MakeIngressRecord(event watch.Event) kubeClientModel.Event {
 func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 	ret := kubeClientModel.Event{}
 	switch pvc := event.Object.(type) {
-	case *core_v1.PersistentVolumeClaim:
+	case *coreV1.PersistentVolumeClaim:
 		ret = kubeClientModel.Event{
 			Time:              time.Now().Format(time.RFC3339),
 			Kind:              kubeClientModel.EventInfo,
@@ -226,7 +226,7 @@ func MakePVCRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeSecretRecord(event watch.Event) kubeClientModel.Event {
-	sct := event.Object.(*core_v1.Secret)
+	sct := event.Object.(*coreV1.Secret)
 	ret := kubeClientModel.Event{
 		Time:              time.Now().Format(time.RFC3339),
 		Kind:              kubeClientModel.EventInfo,
@@ -250,7 +250,7 @@ func MakeSecretRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeConfigMapRecord(event watch.Event) kubeClientModel.Event {
-	cm := event.Object.(*core_v1.ConfigMap)
+	cm := event.Object.(*coreV1.ConfigMap)
 	ret := kubeClientModel.Event{
 		Time:              time.Now().Format(time.RFC3339),
 		Kind:              kubeClientModel.EventInfo,
@@ -274,8 +274,7 @@ func MakeConfigMapRecord(event watch.Event) kubeClientModel.Event {
 }
 
 func MakeNodeRecord(event watch.Event) kubeClientModel.Event {
-	//TODO
-	node := event.Object.(*core_v1.Node)
+	node := event.Object.(*coreV1.Node)
 	ret := kubeClientModel.Event{
 		Time:         time.Now().Format(time.RFC3339),
 		Kind:         kubeClientModel.EventInfo,
