@@ -33,7 +33,6 @@ var errorReasons = eventSet{
 	kubeletEvents.NodeSelectorMismatching:    nil,
 	kubeletEvents.InsufficientFreeCPU:        nil,
 	kubeletEvents.InsufficientFreeMemory:     nil,
-	kubeletEvents.HostNetworkNotSupported:    nil,
 	kubeletEvents.UnsupportedMountOption:     nil,
 	kubeletEvents.FailedCreatePodSandBox:     nil,
 	kubeletEvents.FailedStatusPodSandBox:     nil,

@@ -16,7 +16,6 @@ require (
 	github.com/go-openapi/swag v0.0.0-20180825180336-0dc164b7900e // indirect
 	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
-	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect
@@ -35,14 +34,15 @@ require (
 	github.com/spf13/pflag v1.0.2 // indirect
 	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793 // indirect
 	golang.org/x/net v0.0.0-20180906233101-161cd47e91fd // indirect
+	golang.org/x/oauth2 v0.0.0-20181003184128-c57b0facaced // indirect
 	golang.org/x/sys v0.0.0-20180906133057-8cf3aee42992 // indirect
-	golang.org/x/text v0.3.0 // indirect
+	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
+	google.golang.org/appengine v1.2.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/urfave/cli.v2 v2.0.0-20180128182452-d3ae77c26ac8
 	gopkg.in/yaml.v2 v2.2.1 // indirect
-	k8s.io/api v0.0.0-20180913155108-f456898a08e4
-	k8s.io/apimachinery v0.0.0-20180126010752-19e3f5aa3adc
-	k8s.io/client-go v6.0.0+incompatible
-	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
-	k8s.io/kubernetes v1.11.2
+	k8s.io/api v0.0.0-20181004124137-fd83cbc87e76
+	k8s.io/apimachinery v0.0.0-20180913025736-6dd46049f395
+	k8s.io/client-go v9.0.0+incompatible
+	k8s.io/kubernetes v1.12.0
 )
