@@ -3,7 +3,7 @@ package main
 import (
 	"regexp"
 
-	coreV1 "k8s.io/api/core/v1"
+	apiCore "k8s.io/api/core/v1"
 	volumeEvents "k8s.io/kubernetes/pkg/controller/volume/events"
 	kubeletEvents "k8s.io/kubernetes/pkg/kubelet/events"
 )
@@ -124,7 +124,7 @@ var eventsWhitelist = wlblReasonsMessages{
 	kubeletEvents.NodeSelectorMismatching: nil,
 }
 
-func (errs wlblReasonsMessages) check(event *coreV1.Event) bool {
+func (errs wlblReasonsMessages) check(event *apiCore.Event) bool {
 	bl, inWl := errs[event.Reason]
 	if !inWl {
 		return false
