@@ -7,13 +7,12 @@ FROM alpine:3.7
 COPY --from=builder /bin/kube-events /
 ENV CONFIG="" \
   DEBUG="" \
-  TEXT_LOG="" \
-  MONGO_ADDRS="mongodb:27017" \
-  MONGO_USER="user" \
+  TEXTLOG="" \
+  MONGO_ADDR="mongodb:27017" \
+  MONGO_LOGIN="user" \
   MONGO_PASSWORD="pass" \
-  MONGO_DATABASE="kube-events" \
-  MONGO_COLLECTION_SIZE="1073741824" \
-  MONGO_COLLECTION_MAX_DOCS="" \
+  MONGO_DB="kube-events" \
   BUFFER_CAPACITY="500" \
-  BUFFER_FLUSH_PERIOD="30s"
+  BUFFER_FLUSH_PERIOD="30s" \
+  BUFFER_MIN_INSERT_EVENTS="1"
 CMD ["/kube-events"]
