@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"k8s.io/api/apps/v1"
-	core_v1 "k8s.io/api/core/v1"
+	apiCore "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 )
@@ -45,20 +45,20 @@ func (df *DeployFilter) Filter(event watch.Event) bool {
 }
 
 func ResourceQuotaFilter(event watch.Event) bool {
-	rq, ok := event.Object.(*core_v1.ResourceQuota)
+	rq, ok := event.Object.(*apiCore.ResourceQuota)
 	if !ok {
 		return false
 	}
 	if event.Type == watch.Modified {
-		specLimitsMemory := rq.Spec.Hard[core_v1.ResourceLimitsMemory]
-		specLimitsCPU := rq.Spec.Hard[core_v1.ResourceLimitsCPU]
-		specRequestsMemory := rq.Spec.Hard[core_v1.ResourceRequestsMemory]
-		specRequestsCPU := rq.Spec.Hard[core_v1.ResourceRequestsCPU]
+		specLimitsMemory := rq.Spec.Hard[apiCore.ResourceLimitsMemory]
+		specLimitsCPU := rq.Spec.Hard[apiCore.ResourceLimitsCPU]
+		specRequestsMemory := rq.Spec.Hard[apiCore.ResourceRequestsMemory]
+		specRequestsCPU := rq.Spec.Hard[apiCore.ResourceRequestsCPU]
 
-		statusLimitsMemory := rq.Status.Hard[core_v1.ResourceLimitsMemory]
-		statusLimitsCPU := rq.Status.Hard[core_v1.ResourceLimitsCPU]
-		statusRequestsMemory := rq.Status.Hard[core_v1.ResourceRequestsMemory]
-		statusRequestsCPU := rq.Status.Hard[core_v1.ResourceRequestsCPU]
+		statusLimitsMemory := rq.Status.Hard[apiCore.ResourceLimitsMemory]
+		statusLimitsCPU := rq.Status.Hard[apiCore.ResourceLimitsCPU]
+		statusRequestsMemory := rq.Status.Hard[apiCore.ResourceRequestsMemory]
+		statusRequestsCPU := rq.Status.Hard[apiCore.ResourceRequestsCPU]
 
 		return specLimitsMemory.Cmp(statusLimitsMemory) != 0 ||
 			specLimitsCPU.Cmp(statusLimitsCPU) != 0 ||
@@ -76,7 +76,7 @@ func EventsFilter(event watch.Event) bool {
 		return false
 	}
 
-	kubeEvent, ok := event.Object.(*core_v1.Event)
+	kubeEvent, ok := event.Object.(*apiCore.Event)
 	if !ok {
 		return false
 	}
@@ -93,7 +93,7 @@ func EventsFilter(event watch.Event) bool {
 }
 
 func PVCFilter(event watch.Event) bool {
-	pv, ok := event.Object.(*core_v1.PersistentVolumeClaim)
+	pv, ok := event.Object.(*apiCore.PersistentVolumeClaim)
 	if !ok {
 		return false
 	}

@@ -3,7 +3,7 @@ package mongodb
 import (
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/globalsign/mgo"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -34,12 +34,12 @@ var Collections = []string{
 
 type Storage struct {
 	db  *mgo.Database
-	log *logrus.Entry
+	log *log.Entry
 }
 
 func OpenConnection(cfg *mgo.DialInfo) (*Storage, error) {
-	log := logrus.WithField("component", "mongo-storage")
-	log.WithFields(logrus.Fields{
+	connLog := log.WithField("component", "mongo-storage")
+	connLog.WithFields(log.Fields{
 		"addrs":    cfg.Addrs,
 		"user":     cfg.Username,
 		"database": cfg.Database,
@@ -52,7 +52,7 @@ func OpenConnection(cfg *mgo.DialInfo) (*Storage, error) {
 
 	storage := &Storage{
 		db:  db,
-		log: log,
+		log: connLog,
 	}
 
 	if err := storage.createCollectionIfNotExist(EventsCollection); err != nil {
@@ -111,7 +111,7 @@ func (s *Storage) BulkInsert(r []kubeClientModel.Event, collection string) error
 	if err != nil {
 		return err
 	}
-	s.log.WithFields(logrus.Fields{
+	s.log.WithFields(log.Fields{
 		"matched":  result.Matched,
 		"modified": result.Modified,
 	}).Debug("Bulk insert run")
