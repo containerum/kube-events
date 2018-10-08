@@ -48,11 +48,12 @@ func ObservableTypeFromObject(object runtime.Object) model.ObservableResource {
 func MakeNamespaceRecord(event watch.Event) kubeClientModel.Event {
 	rq := event.Object.(*apiCore.ResourceQuota)
 	ret := kubeClientModel.Event{
-		Time:         time.Now().Format(time.RFC3339),
-		Kind:         kubeClientModel.EventInfo,
-		ResourceName: rq.Namespace,
-		ResourceUID:  string(rq.UID),
-		ResourceType: kubeClientModel.TypeNamespace,
+		Time:              time.Now().Format(time.RFC3339),
+		Kind:              kubeClientModel.EventInfo,
+		ResourceName:      rq.Namespace,
+		ResourceNamespace: rq.Namespace,
+		ResourceUID:       string(rq.UID),
+		ResourceType:      kubeClientModel.TypeNamespace,
 	}
 	switch event.Type {
 	case watch.Added:
