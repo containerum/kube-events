@@ -30,58 +30,58 @@ var (
 
 	textlogFlag = cli.BoolFlag{
 		Name:    "textlog",
-		EnvVars: []string{"TEXT_LOG"},
+		EnvVars: []string{"TEXTLOG"},
 		Usage:   "Print logs in text mode instead of json.",
 	}
 
 	mongoAddressFlag = cli.StringSliceFlag{
-		Name:    "mongo-address",
-		EnvVars: []string{"MONGO_ADDRS"},
+		Name:    "mongo_addr",
+		EnvVars: []string{"MONGO_ADDR"},
 		Usage:   "MongoDB host addresses.",
 	}
 
 	mongoUserFlag = cli.StringFlag{
-		Name:    "mongo-user",
-		EnvVars: []string{"MONGO_USER"},
+		Name:    "MONGO_LOGIN",
+		EnvVars: []string{"mongo_login"},
 		Usage:   "Username to connect MongoDB.",
 	}
 
 	mongoPasswordFlag = cli.StringFlag{
-		Name:    "mongo-password",
+		Name:    "mongo_password",
 		EnvVars: []string{"MONGO_PASSWORD"},
 		Usage:   "Password to connect MongoDB.",
 	}
 
 	mongoDatabaseFlag = cli.StringFlag{
-		Name:    "mongo-database",
-		EnvVars: []string{"MONGO_DATABASE"},
+		Name:    "mongo_db",
+		EnvVars: []string{"MONGO_DB"},
 		Usage:   "Database to use in MongoDB.",
 		Value:   "kube-watches",
 	}
 
 	bufferCapacityFlag = cli.IntFlag{
-		Name:    "buffer-capacity",
+		Name:    "buffer_capacity",
 		EnvVars: []string{"BUFFER_CAPACITY"},
 		Usage:   "Events buffer capacity (pre-allocated size).",
 		Value:   200,
 	}
 
 	bufferMinInsertEventsFlag = cli.IntFlag{
-		Name:    "buffer-min-insert-events",
+		Name:    "buffer_min_insert_events",
 		EnvVars: []string{"BUFFER_MIN_INSERT_EVENTS"},
 		Usage:   "Minimal count of events in buffer to perform insert operation.",
 		Value:   1,
 	}
 
 	bufferFlushPeriodFlag = cli.DurationFlag{
-		Name:    "buffer-flush-period",
+		Name:    "buffer_flush_period",
 		EnvVars: []string{"BUFFER_FLUSH_PERIOD"},
 		Usage:   "Events buffer to storage flush period.",
 		Value:   30 * time.Second,
 	}
 
 	connectTimeoutFlag = cli.DurationFlag{
-		Name:    "connection-timeout",
+		Name:    "connection_timeout",
 		EnvVars: []string{"CONNECTION_TIMEOUT"},
 		Usage:   "Kubernetes connection timeout.",
 		Value:   5 * time.Second,
