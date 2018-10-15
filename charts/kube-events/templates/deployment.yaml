@@ -38,11 +38,11 @@ spec:
               value: {{ $val | quote }}
             {{- end }}
 
-            {{- if .Values.env.local.MONGO_ADDRS }}
-            - name: MONGO_ADDRS
-              value: "{{ .Values.env.local.MONGO_ADDRS }}"
+            {{- if .Values.env.local.MONGO_ADDR }}
+            - name: MONGO_ADDR
+              value: "{{ .Values.env.local.MONGO_ADDR }}"
             {{- else }}
-            - name: MONGO_ADDRS
+            - name: MONGO_ADDR
               value: "{{ .Release.Name }}-mongodb:27017"
             {{- end }}
 

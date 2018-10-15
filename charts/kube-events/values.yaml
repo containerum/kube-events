@@ -15,11 +15,11 @@ rbac:
 
 env:
   local:
-    MONGO_ADDRS: "mongo-mongodb.mongo.svc:27017"
+    MONGO_ADDR: "mongo-mongodb.mongo.svc:27017"
     MONGO_PASSWORD:
   global:
-    MONGO_USER: "events_user"
-    MONGO_DATABASE: "events"
+    MONGO_LOGIN: "events_user"
+    MONGO_DB: "events"
     BUFFER_FLUSH_PERIOD: "30s"
     BUFFER_MIN_INSERT_EVENTS: "1"
     DEBUG: "false"
