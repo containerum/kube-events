@@ -41,8 +41,8 @@ var (
 	}
 
 	mongoUserFlag = cli.StringFlag{
-		Name:    "MONGO_LOGIN",
-		EnvVars: []string{"mongo_login"},
+		Name:    "mongo_login",
+		EnvVars: []string{"MONGO_LOGIN"},
 		Usage:   "Username to connect MongoDB.",
 	}
 
