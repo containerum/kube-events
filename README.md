@@ -1,5 +1,5 @@
-# Kube-events for Containerum Platform
-Kube-events is a component that sources events from the Kubernetes cluster and writes them in the database for [Containerum Platform](https://github.com/containerum/containerum).
+# Kube-events for Containerum
+Kube-events is a component that sources events from Kubernetes clusters and writes them in the database for [Containerum](https://github.com/containerum/containerum).
 
 ## Prerequisites
 * Kubernetes
