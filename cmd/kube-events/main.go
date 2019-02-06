@@ -64,7 +64,11 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 	req := http.Request{
 		Method: http.MethodGet,
 		URL:    reqURL,
+		Header: http.Header{},
 	}
+	token := fmt.Sprintf("Bearer %s", client.config.BearerToken)
+	req.Header.Add("Authorization", token)
+
 	defer ticker.Stop()
 	for {
 		select {
