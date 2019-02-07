@@ -66,6 +66,7 @@ func pingKube(client *Kube, pingPeriod time.Duration, errChan chan<- error, stop
 		URL:    reqURL,
 		Header: http.Header{},
 	}
+
 	token := fmt.Sprintf("Bearer %s", client.config.BearerToken)
 	req.Header.Add("Authorization", token)
 
@@ -104,6 +105,7 @@ func action(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	log.WithField("Size", len(kubeClient.config.BearerToken)).Debug("BearerToken")
 
 	watchers := kubeClient.WatchSupportedResources()
 

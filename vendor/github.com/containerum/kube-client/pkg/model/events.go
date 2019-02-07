@@ -4,6 +4,7 @@ import "time"
 
 type EventKind string
 
+//Event level
 const (
 	EventError   EventKind = "error"
 	EventWarning EventKind = "warning"
@@ -12,6 +13,7 @@ const (
 
 type ResourceType string
 
+//Resource types
 const (
 	TypeNamespace  ResourceType = "namespace"
 	TypeDeployment ResourceType = "deployment"
@@ -27,10 +29,29 @@ const (
 	TypeSystem     ResourceType = "system"
 )
 
+//Pre-defined event names
 const (
+	//Generic resource events
 	ResourceCreated  string = "ResourceCreated"
 	ResourceModified string = "ResourceModified"
 	ResourceDeleted  string = "ResourceDeleted"
+
+	//User events
+	UserRegistered string = "UserRegistered"
+	UserActivated  string = "UserActivated"
+	UserDeleted    string = "UserDeleted"
+
+	//Group events
+	GroupCreated         string = "GroupCreated"
+	GroupDeleted         string = "GroupDeleted"
+	UserAddedToGroup     string = "UserAddedToGroup"
+	UserRemovedFromGroup string = "UserRemovedFromGroup"
+
+	//Other
+	ExternalIPAdded     string = "ExternalIPAdded"
+	ExternalIPDeleted   string = "ExternalIPDeleted"
+	StorageClassAdded   string = "StorageClassAdded"
+	StorageClassDeleted string = "StorageClassDeleted"
 )
 
 type EventsList struct {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"time"
 
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
@@ -12,6 +13,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+)
+
+const (
+	tokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 )
 
 var (
@@ -105,15 +110,19 @@ func setupLogs(ctx *cli.Context) {
 func setupKubeClient(ctx *cli.Context) (*Kube, error) {
 	var config *rest.Config
 	var err error
+	var errFile error
+	var token []byte
 
 	if cfg := ctx.String(configFlag.Name); cfg == "" {
 		log.Info("Kube: Using InClusterConfig")
 		config, err = rest.InClusterConfig()
+		token, errFile = ioutil.ReadFile(tokenFile)
+		config.BearerToken = string(token)
 	} else {
 		log.Info("Kube: Using config from ", cfg)
 		config, err = clientcmd.BuildConfigFromFlags("", cfg)
 	}
-	if err != nil {
+	if err != nil || errFile != nil {
 		return nil, err
 	}
 
