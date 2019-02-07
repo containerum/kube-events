@@ -24,7 +24,7 @@ before_deploy:
   - docker login -u="$DOCKER_LOGIN" -p="$DOCKER_PASSWORD"
   - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:latest"
   - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${TRAVIS_TAG}"
-  - sh -c sed -i "s/v1.0.0/${TRAVIS_TAG}" charts/$NAME/values.yaml'
+  - sed -i "s/v1.0.0/${TRAVIS_TAG}/" charts/$NAME/values.yaml
   - mkdir -p /tmp/charts
   - helm repo add chartmuseum ${MUSEUM}
   - helm package charts/$NAME --version="${TRAVIS_TAG}" --dependency-update --destination /tmp/charts
